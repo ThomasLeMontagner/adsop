@@ -1943,6 +1943,18 @@
                 id="c6a0ec68-c1fe-4779-915a-ad793480c903" value="1"/>
           </ownedElements>
         </ownedExchangeItems>
+        <ownedExchangeItems xsi:type="org.polarsys.capella.core.data.information:ExchangeItem"
+            id="5844acd3-b6ae-4308-9b02-5a5a350039ac" name="Command status" exchangeMechanism="FLOW">
+          <ownedElements xsi:type="org.polarsys.capella.core.data.information:ExchangeItemElement"
+              id="fd01f47b-df76-410d-85aa-7d6fb492adf3" name="ExchangeItemElement 1"
+              abstractType="#c355c471-8534-4f90-a620-b0a919de5fd7" direction="UNSET"
+              composite="true">
+            <ownedMinCard xsi:type="org.polarsys.capella.core.data.information.datavalue:LiteralNumericValue"
+                id="afcb784d-fe4c-41ce-8349-95513563e13c" value="1"/>
+            <ownedMaxCard xsi:type="org.polarsys.capella.core.data.information.datavalue:LiteralNumericValue"
+                id="fa0eed2d-c39a-4171-bbe3-fe08dc9419d2" value="1"/>
+          </ownedElements>
+        </ownedExchangeItems>
         <ownedAssociations xsi:type="org.polarsys.capella.core.data.information:Association"
             id="bc8da9b2-df0d-4348-a9bd-b6934c4e261c" name="DataAssociation1" navigableMembers="#d6dc5343-eb2d-42b8-a768-8d0fcd524041">
           <ownedMembers xsi:type="org.polarsys.capella.core.data.information:Property"
@@ -2007,6 +2019,17 @@
                 id="999d3325-24e6-4e1f-9746-998d20a8fd52" value="1"/>
             <ownedMaxCard xsi:type="org.polarsys.capella.core.data.information.datavalue:LiteralNumericValue"
                 id="6714e813-0634-488a-b330-03fe7bc5f181" value="1"/>
+          </ownedMembers>
+        </ownedAssociations>
+        <ownedAssociations xsi:type="org.polarsys.capella.core.data.information:Association"
+            id="d0da4cb0-3d09-4cc9-9273-03e0fb9bcaca" name="DataAssociation7" navigableMembers="#c28c76d2-2c14-49f3-92b6-2f3524ab9993">
+          <ownedMembers xsi:type="org.polarsys.capella.core.data.information:Property"
+              id="edf498bf-6ca4-4e50-901e-68714ee887d4" name="spacecraft information"
+              abstractType="#b7b43622-9abf-46f4-9461-81a752512d8c" aggregationKind="ASSOCIATION">
+            <ownedMinCard xsi:type="org.polarsys.capella.core.data.information.datavalue:LiteralNumericValue"
+                id="091dd4e3-bcb5-4032-9497-bc296d904df8" value="1"/>
+            <ownedMaxCard xsi:type="org.polarsys.capella.core.data.information.datavalue:LiteralNumericValue"
+                id="d12e4247-7d54-42f8-824e-97381a2db933" value="1"/>
           </ownedMembers>
         </ownedAssociations>
         <ownedDataPkgs xsi:type="org.polarsys.capella.core.data.information:DataPkg"
@@ -2142,6 +2165,14 @@
             <ownedMaxCard xsi:type="org.polarsys.capella.core.data.information.datavalue:LiteralNumericValue"
                 id="2e5d8459-55df-4d72-955d-a9239fd0543d" value="1"/>
           </ownedFeatures>
+          <ownedFeatures xsi:type="org.polarsys.capella.core.data.information:Property"
+              id="c28c76d2-2c14-49f3-92b6-2f3524ab9993" name="command sttus" abstractType="#c355c471-8534-4f90-a620-b0a919de5fd7"
+              aggregationKind="COMPOSITION">
+            <ownedMinCard xsi:type="org.polarsys.capella.core.data.information.datavalue:LiteralNumericValue"
+                id="96c1b5f8-9cb9-4888-8ade-e826e2651a1e" value="1"/>
+            <ownedMaxCard xsi:type="org.polarsys.capella.core.data.information.datavalue:LiteralNumericValue"
+                id="1d2e818b-24b2-4d78-afa1-3a0a8f5cbf1d" value="1"/>
+          </ownedFeatures>
         </ownedClasses>
         <ownedClasses xsi:type="org.polarsys.capella.core.data.information:Class"
             id="91899bbd-0ae6-4a18-9dc6-28d127022165" name="Health status">
@@ -2182,6 +2213,8 @@
             id="81b2df86-827b-43cb-9d3c-59bb73e780a5" name="Recovery action"/>
         <ownedClasses xsi:type="org.polarsys.capella.core.data.information:Class"
             id="7ca145a2-e965-4141-bcac-29305ed4c3d0" name="Mission event"/>
+        <ownedClasses xsi:type="org.polarsys.capella.core.data.information:Class"
+            id="c355c471-8534-4f90-a620-b0a919de5fd7" name="Command status"/>
       </ownedDataPkg>
       <ownedSystemComponentPkg xsi:type="org.polarsys.capella.core.data.ctx:SystemComponentPkg"
           id="82bc6f01-7503-429e-8540-811dbb9b9f8d" name="Structure">
@@ -2653,6 +2686,89 @@
             <ownedFunctionalChainInvolvements xsi:type="org.polarsys.capella.core.data.fa:FunctionalChainInvolvementFunction"
                 id="8c54cbbb-016b-4b9b-a88a-9647cee1095b" involved="#4223e172-8192-4b74-8e36-3bed9f1bb1b2"/>
           </ownedFunctionalChains>
+          <ownedFunctionalChains xsi:type="org.polarsys.capella.core.data.fa:FunctionalChain"
+              id="16bfd537-bf86-4539-9c35-95ae4a1f6a9c" name="Support procedure execution">
+            <ownedFunctionalChainInvolvements xsi:type="org.polarsys.capella.core.data.fa:FunctionalChainInvolvementLink"
+                id="fbd7ada1-4565-47bd-989e-1adaebfa14a3" involved="#6ef0e876-014f-4759-ad62-50a0a43594d2"
+                source="#2b61e62d-030d-437c-bc96-e769552981c1" target="#efc6bb51-654d-4b5c-8b38-8614a2e9317b"/>
+            <ownedFunctionalChainInvolvements xsi:type="org.polarsys.capella.core.data.fa:FunctionalChainInvolvementFunction"
+                id="2b61e62d-030d-437c-bc96-e769552981c1" involved="#c0dd857a-f471-40d1-bf29-af6aadaa2c6e"/>
+            <ownedFunctionalChainInvolvements xsi:type="org.polarsys.capella.core.data.fa:FunctionalChainInvolvementLink"
+                id="3375cf26-0356-48fe-b9d0-d85d7025fad0" involved="#4af48591-381c-4b09-a671-a1b9b9edf05a"
+                source="#2aae9773-ef15-46da-9561-2673d9507c33" target="#3bf9115b-ce9f-4fcc-a33f-85187843b093"/>
+            <ownedFunctionalChainInvolvements xsi:type="org.polarsys.capella.core.data.fa:FunctionalChainInvolvementFunction"
+                id="3bf9115b-ce9f-4fcc-a33f-85187843b093" involved="#79b55903-8de4-4096-99e7-e8efcc1bc9da"/>
+            <ownedFunctionalChainInvolvements xsi:type="org.polarsys.capella.core.data.fa:FunctionalChainInvolvementLink"
+                id="4318bf15-9fd6-4934-bfb1-43531fe54441" involved="#9a037fac-012d-4f0a-84e8-23a74398c903"
+                source="#3bf9115b-ce9f-4fcc-a33f-85187843b093" target="#a07aa04a-fe40-4c10-99be-d69a6577cf6e"/>
+            <ownedFunctionalChainInvolvements xsi:type="org.polarsys.capella.core.data.fa:FunctionalChainInvolvementFunction"
+                id="a07aa04a-fe40-4c10-99be-d69a6577cf6e" involved="#a544e463-b93e-4ce3-8ac2-49729ac0eaa9"/>
+            <ownedFunctionalChainInvolvements xsi:type="org.polarsys.capella.core.data.fa:FunctionalChainInvolvementLink"
+                id="423f2b2f-9c7a-41c7-8dfa-8a9ad9dac998" involved="#948f76be-f2aa-4ab0-aa40-91009f9c588b"
+                source="#a07aa04a-fe40-4c10-99be-d69a6577cf6e" target="#93318f26-164f-43c2-b388-909e93f159e7"/>
+            <ownedFunctionalChainInvolvements xsi:type="org.polarsys.capella.core.data.fa:FunctionalChainInvolvementFunction"
+                id="93318f26-164f-43c2-b388-909e93f159e7" involved="#1828a6b7-27eb-449a-94ae-40f76c855dba"/>
+            <ownedFunctionalChainInvolvements xsi:type="org.polarsys.capella.core.data.fa:FunctionalChainInvolvementFunction"
+                id="2aae9773-ef15-46da-9561-2673d9507c33" involved="#b04b0494-2dcf-4565-a2b7-12a611b6b582"/>
+            <ownedFunctionalChainInvolvements xsi:type="org.polarsys.capella.core.data.fa:FunctionalChainInvolvementFunction"
+                id="efc6bb51-654d-4b5c-8b38-8614a2e9317b" involved="#3cc59848-2c76-45df-98ff-2cca6ce8a8fc"/>
+            <ownedFunctionalChainInvolvements xsi:type="org.polarsys.capella.core.data.fa:FunctionalChainInvolvementFunction"
+                id="f013bb54-2bd6-4ca3-a87e-07a58bcffd8c" involved="#4cf2cd59-ebcf-4ec3-aff2-30f0e18864d9"/>
+            <ownedFunctionalChainInvolvements xsi:type="org.polarsys.capella.core.data.fa:FunctionalChainInvolvementLink"
+                id="243f3654-5aae-4491-bfe3-03ad6dbbeb7e" involved="#6cbb7035-8dd4-4396-8298-d97c9f99cb03"
+                source="#efc6bb51-654d-4b5c-8b38-8614a2e9317b" target="#f013bb54-2bd6-4ca3-a87e-07a58bcffd8c"/>
+            <ownedFunctionalChainInvolvements xsi:type="org.polarsys.capella.core.data.fa:FunctionalChainInvolvementLink"
+                id="870ee5f1-4667-43bf-8758-0b4187b25bf7" involved="#6b0c74e7-71e4-4f84-bd62-6504ed2e2413"
+                source="#f013bb54-2bd6-4ca3-a87e-07a58bcffd8c" target="#2aae9773-ef15-46da-9561-2673d9507c33"/>
+            <ownedFunctionalChainRealizations xsi:type="org.polarsys.capella.core.data.fa:FunctionalChainRealization"
+                id="9861ba57-b3e2-48ab-abb8-7cc3f8a075cd" targetElement="#a28e1e45-f7a7-4aa0-94fc-db6cdcca8fe8"
+                sourceElement="#16bfd537-bf86-4539-9c35-95ae4a1f6a9c"/>
+          </ownedFunctionalChains>
+          <ownedFunctionalChains xsi:type="org.polarsys.capella.core.data.fa:FunctionalChain"
+              id="d9524776-c36c-41b4-8975-c4a253425e87" name="Manage command execution status">
+            <ownedFunctionalChainInvolvements xsi:type="org.polarsys.capella.core.data.fa:FunctionalChainInvolvementLink"
+                id="ce370c6e-aaf4-4361-80e8-468f73690636" involved="#748d5096-07e0-4f5e-b9e3-8af6d6b945da"
+                source="#103eb9d0-8169-4e09-98ac-bfa860cfb5a5" target="#9085cb22-0c3e-47c1-8f10-26aa9b7fb0e7"/>
+            <ownedFunctionalChainInvolvements xsi:type="org.polarsys.capella.core.data.fa:FunctionalChainInvolvementFunction"
+                id="9085cb22-0c3e-47c1-8f10-26aa9b7fb0e7" involved="#71ba0b8c-88b9-4948-9077-3afc8e4f3881"/>
+            <ownedFunctionalChainInvolvements xsi:type="org.polarsys.capella.core.data.fa:FunctionalChainInvolvementFunction"
+                id="103eb9d0-8169-4e09-98ac-bfa860cfb5a5" involved="#f8f531b9-63d3-458c-9c78-1a98d4683305"/>
+            <ownedFunctionalChainInvolvements xsi:type="org.polarsys.capella.core.data.fa:FunctionalChainInvolvementLink"
+                id="7c517217-be5c-4de8-978b-bb15a54e7359" involved="#16755326-822d-4ed1-8e0e-a341f441291c"
+                source="#f4f69d03-bce3-44c9-900b-db18b217e398" target="#9085cb22-0c3e-47c1-8f10-26aa9b7fb0e7"/>
+            <ownedFunctionalChainInvolvements xsi:type="org.polarsys.capella.core.data.fa:FunctionalChainInvolvementFunction"
+                id="f4f69d03-bce3-44c9-900b-db18b217e398" involved="#5d8f4d45-ce81-421b-a3fd-93366d4595ee"/>
+            <ownedFunctionalChainInvolvements xsi:type="org.polarsys.capella.core.data.fa:FunctionalChainInvolvementLink"
+                id="b3ddcde8-6502-4cfc-8af6-1b318df2deda" involved="#2dc87032-a5a9-45c4-940e-abea8beab43d"
+                source="#9085cb22-0c3e-47c1-8f10-26aa9b7fb0e7" target="#1f2cbc22-d5d7-422f-932e-aa95f78e2019"/>
+            <ownedFunctionalChainInvolvements xsi:type="org.polarsys.capella.core.data.fa:FunctionalChainInvolvementFunction"
+                id="1f2cbc22-d5d7-422f-932e-aa95f78e2019" involved="#a485d0d2-324e-4959-9163-d779f39954b0"/>
+            <ownedFunctionalChainInvolvements xsi:type="org.polarsys.capella.core.data.fa:FunctionalChainInvolvementLink"
+                id="3a64851d-1456-4668-b69c-f0dcfbfb7b8c" involved="#85fadb3c-80a8-40b2-a462-1b30a347a984"
+                source="#1f2cbc22-d5d7-422f-932e-aa95f78e2019" target="#eb23aba8-259c-40eb-bfb2-55330f41e295"/>
+            <ownedFunctionalChainInvolvements xsi:type="org.polarsys.capella.core.data.fa:FunctionalChainInvolvementFunction"
+                id="eb23aba8-259c-40eb-bfb2-55330f41e295" involved="#d4edb368-db89-40f4-9d44-85e625df6e5d"/>
+            <ownedFunctionalChainInvolvements xsi:type="org.polarsys.capella.core.data.fa:FunctionalChainInvolvementLink"
+                id="b84adeae-d6f0-45fe-94a1-15015ce032ef" involved="#f772367d-4abe-4962-a479-0f9005ad396d"
+                source="#eb23aba8-259c-40eb-bfb2-55330f41e295" target="#4552b596-018a-4feb-bba9-1c7d1125ccfb"/>
+            <ownedFunctionalChainInvolvements xsi:type="org.polarsys.capella.core.data.fa:FunctionalChainInvolvementFunction"
+                id="4552b596-018a-4feb-bba9-1c7d1125ccfb" involved="#7859b9c8-e9b2-44fb-9a5c-a4a8162899c7"/>
+            <ownedFunctionalChainInvolvements xsi:type="org.polarsys.capella.core.data.fa:FunctionalChainInvolvementLink"
+                id="aa2914f2-707a-400e-81c8-bba28a53da9a" involved="#e2f315bb-dd7f-4d52-b1e6-312e7de5c977"
+                source="#4552b596-018a-4feb-bba9-1c7d1125ccfb" target="#3532958c-2af1-4c1f-a9da-3d71e3b529a8"/>
+            <ownedFunctionalChainInvolvements xsi:type="org.polarsys.capella.core.data.fa:FunctionalChainInvolvementFunction"
+                id="3532958c-2af1-4c1f-a9da-3d71e3b529a8" involved="#a0979023-850e-40b8-8a42-51b1f76141f0"/>
+            <ownedFunctionalChainInvolvements xsi:type="org.polarsys.capella.core.data.fa:FunctionalChainInvolvementLink"
+                id="edbef81b-05b7-4dbd-88c4-c8d14afe9af5" involved="#ae8da12f-7338-4f6c-8869-32e0d03501ea"
+                source="#3532958c-2af1-4c1f-a9da-3d71e3b529a8" target="#4570c2cb-616c-4c21-9533-0ce6707913ba"/>
+            <ownedFunctionalChainInvolvements xsi:type="org.polarsys.capella.core.data.fa:FunctionalChainInvolvementFunction"
+                id="4570c2cb-616c-4c21-9533-0ce6707913ba" involved="#a9acde78-c6d5-4419-b602-9c411a679658"/>
+            <ownedFunctionalChainInvolvements xsi:type="org.polarsys.capella.core.data.fa:FunctionalChainInvolvementLink"
+                id="0a94df3f-b738-4529-b415-d036d14622d5" involved="#d5b83254-6e93-4a0a-bfb5-47a91ab21963"
+                source="#4570c2cb-616c-4c21-9533-0ce6707913ba" target="#098916ee-edfd-4c8d-8993-1b0c3154ceda"/>
+            <ownedFunctionalChainInvolvements xsi:type="org.polarsys.capella.core.data.fa:FunctionalChainInvolvementFunction"
+                id="098916ee-edfd-4c8d-8993-1b0c3154ceda" involved="#5b7521d3-48bb-41c1-b5b7-044df89785e8"/>
+          </ownedFunctionalChains>
           <ownedFunctions xsi:type="org.polarsys.capella.core.data.la:LogicalFunction"
               id="7859b9c8-e9b2-44fb-9a5c-a4a8162899c7" name="Acquite spacecraft data"
               summary="Receive telemetry, spacecraft modes, fault events and recovery reports">
@@ -2712,6 +2828,8 @@
                   id="87b93348-4aff-4021-bd35-f615fe79cd0e" targetElement="#0f1a6606-6192-40af-82d6-c9b5f7196a3b"
                   sourceElement="#a0e9ff01-b586-428c-bb6a-8ccf370a25ca"/>
             </outputs>
+            <outputs xsi:type="org.polarsys.capella.core.data.fa:FunctionOutputPort"
+                id="3876323d-4abf-46a0-b8c7-310568c988a8" name="FOP 3"/>
             <ownedFunctionRealizations xsi:type="org.polarsys.capella.core.data.fa:FunctionRealization"
                 id="a0f73a5a-4c3c-4271-9c4d-10e5c9b3d2c7" targetElement="#887c31a7-429b-48a1-a336-837f8e1927ff"
                 sourceElement="#a9acde78-c6d5-4419-b602-9c411a679658"/>
@@ -2869,7 +2987,7 @@
                   id="320d42d8-f496-47af-a108-25035e9f2738" name="FOP 1"/>
             </ownedFunctions>
             <ownedFunctions xsi:type="org.polarsys.capella.core.data.la:LogicalFunction"
-                id="4cf2cd59-ebcf-4ec3-aff2-30f0e18864d9" name="Gnerate command sequence">
+                id="4cf2cd59-ebcf-4ec3-aff2-30f0e18864d9" name="Generate command sequence">
               <inputs xsi:type="org.polarsys.capella.core.data.fa:FunctionInputPort"
                   id="ed978316-bb24-4fe8-96ba-959b4128b9d6" name="FIP 1"/>
               <outputs xsi:type="org.polarsys.capella.core.data.fa:FunctionOutputPort"
@@ -2889,11 +3007,18 @@
                   id="7ad78658-db4c-4599-b681-15b90cf896da" name="FOP 2"/>
             </ownedFunctions>
             <ownedFunctions xsi:type="org.polarsys.capella.core.data.la:LogicalFunction"
-                id="5b7521d3-48bb-41c1-b5b7-044df89785e8" name="Track acknowledgements"/>
+                id="5b7521d3-48bb-41c1-b5b7-044df89785e8" name="Monitor command execution status">
+              <inputs xsi:type="org.polarsys.capella.core.data.fa:FunctionInputPort"
+                  id="75e8f216-4fea-4cbb-8c07-3626ea5b35ea" name="FIP 1"/>
+              <outputs xsi:type="org.polarsys.capella.core.data.fa:FunctionOutputPort"
+                  id="57e8abb7-848f-4d28-86b9-0805429f4110" name="FOP 1"/>
+            </ownedFunctions>
             <ownedFunctions xsi:type="org.polarsys.capella.core.data.la:LogicalFunction"
                 id="20205882-7078-4d35-aa72-55b27ce5166d" name="Maintain command history">
               <inputs xsi:type="org.polarsys.capella.core.data.fa:FunctionInputPort"
                   id="ab59bd3a-f635-4a81-8e04-cf2489cc0528" name="FIP 1"/>
+              <inputs xsi:type="org.polarsys.capella.core.data.fa:FunctionInputPort"
+                  id="9b2a480f-a3f0-4f54-b7a4-f07456465b0e" name="FIP 2"/>
             </ownedFunctions>
             <ownedFunctionRealizations xsi:type="org.polarsys.capella.core.data.fa:FunctionRealization"
                 id="7a2abea7-08f4-4042-a396-7f0f44f182ff" targetElement="#a011799e-c887-4529-8f5f-00d0fd65fd37"
@@ -2907,20 +3032,9 @@
             <ownedFunctionalExchanges xsi:type="org.polarsys.capella.core.data.fa:FunctionalExchange"
                 id="b11b962a-1ac7-4ffb-b46c-e4a6e51bd3fb" name="command schedule"
                 target="#ab59bd3a-f635-4a81-8e04-cf2489cc0528" source="#7ad78658-db4c-4599-b681-15b90cf896da"/>
-          </ownedFunctions>
-          <ownedFunctions xsi:type="org.polarsys.capella.core.data.la:LogicalFunction"
-              id="f8f531b9-63d3-458c-9c78-1a98d4683305" name="Send command acknowledgement">
-            <inputs xsi:type="org.polarsys.capella.core.data.fa:FunctionInputPort"
-                id="209c5c17-bdf1-47b8-be43-973a2870c513" name="FIP 1"/>
-            <outputs xsi:type="org.polarsys.capella.core.data.fa:FunctionOutputPort"
-                id="2638f11a-3cb8-4dca-879c-86b9865f7af4" name="FOP 1"/>
-          </ownedFunctions>
-          <ownedFunctions xsi:type="org.polarsys.capella.core.data.la:LogicalFunction"
-              id="5d8f4d45-ce81-421b-a3fd-93366d4595ee" name="Execute command">
-            <inputs xsi:type="org.polarsys.capella.core.data.fa:FunctionInputPort"
-                id="9527177e-7007-4703-940d-2e2f85ce05e3" name="FIP 1"/>
-            <outputs xsi:type="org.polarsys.capella.core.data.fa:FunctionOutputPort"
-                id="fd333991-d96c-48f7-bec0-d23a9579cc20" name="FOP 1"/>
+            <ownedFunctionalExchanges xsi:type="org.polarsys.capella.core.data.fa:FunctionalExchange"
+                id="8440c566-9186-4880-90f7-76cea3b52ccc" name="command status" target="#9b2a480f-a3f0-4f54-b7a4-f07456465b0e"
+                source="#57e8abb7-848f-4d28-86b9-0805429f4110"/>
           </ownedFunctions>
           <ownedFunctionRealizations xsi:type="org.polarsys.capella.core.data.fa:FunctionRealization"
               id="2e9e4c01-41a8-4dc9-baa8-6fe787988ef3" targetElement="#9a0f75a3-3839-4e02-828e-32f403a49802"
@@ -3165,6 +3279,9 @@
           <ownedFunctionalExchanges xsi:type="org.polarsys.capella.core.data.fa:FunctionalExchange"
               id="16755326-822d-4ed1-8e0e-a341f441291c" name="executed command" target="#f34c8751-6a16-4917-9b24-dcffa9448b75"
               source="#fd333991-d96c-48f7-bec0-d23a9579cc20"/>
+          <ownedFunctionalExchanges xsi:type="org.polarsys.capella.core.data.fa:FunctionalExchange"
+              id="d5b83254-6e93-4a0a-bfb5-47a91ab21963" name="commmand status" target="#75e8f216-4fea-4cbb-8c07-3626ea5b35ea"
+              source="#3876323d-4abf-46a0-b8c7-310568c988a8"/>
           <ownedLogicalFunctionPkgs xsi:type="org.polarsys.capella.core.data.la:LogicalFunctionPkg"
               id="35645058-d07e-4953-bc22-7cecec16db47" name="Deep-Space Communication Network functions">
             <ownedTraces xsi:type="org.polarsys.capella.core.data.capellacommon:TransfoLink"
@@ -3326,9 +3443,6 @@
                   id="98a70210-321f-4635-8515-15366e416632" targetElement="#52e38418-ea81-4cf2-88d8-bb0415978ad1"
                   sourceElement="#fbd7ada1-4565-47bd-989e-1adaebfa14a3"/>
               <ownedTraces xsi:type="org.polarsys.capella.core.data.capellacommon:TransfoLink"
-                  id="085e5cac-df4a-424a-87cb-0273627e35fe" targetElement="#53a439d5-357d-4cf6-aff8-377fce1f7522"
-                  sourceElement="#1027a27c-f5e9-47f1-b53e-22439665e07a"/>
-              <ownedTraces xsi:type="org.polarsys.capella.core.data.capellacommon:TransfoLink"
                   id="b08d2576-f779-46b6-ac90-a1e302ba7207" targetElement="#2b870313-5b90-4d7e-952a-e6381cfd4181"
                   sourceElement="#2b61e62d-030d-437c-bc96-e769552981c1"/>
               <ownedTraces xsi:type="org.polarsys.capella.core.data.capellacommon:TransfoLink"
@@ -3349,38 +3463,6 @@
               <ownedTraces xsi:type="org.polarsys.capella.core.data.capellacommon:TransfoLink"
                   id="92691e07-8147-4402-a6e0-13b861708ab1" targetElement="#0dc02d4a-bd7f-4d24-be18-0a975ac832d5"
                   sourceElement="#93318f26-164f-43c2-b388-909e93f159e7"/>
-              <ownedFunctionalChains xsi:type="org.polarsys.capella.core.data.fa:FunctionalChain"
-                  id="16bfd537-bf86-4539-9c35-95ae4a1f6a9c" name="Support procedure execution">
-                <ownedFunctionalChainInvolvements xsi:type="org.polarsys.capella.core.data.fa:FunctionalChainInvolvementLink"
-                    id="fbd7ada1-4565-47bd-989e-1adaebfa14a3" involved="#6ef0e876-014f-4759-ad62-50a0a43594d2"
-                    source="#2b61e62d-030d-437c-bc96-e769552981c1" target="#efc6bb51-654d-4b5c-8b38-8614a2e9317b"/>
-                <ownedFunctionalChainInvolvements xsi:type="org.polarsys.capella.core.data.fa:FunctionalChainInvolvementFunction"
-                    id="1027a27c-f5e9-47f1-b53e-22439665e07a" involved="#bea3197c-ad82-42cd-9d8c-0ed9a96784db"/>
-                <ownedFunctionalChainInvolvements xsi:type="org.polarsys.capella.core.data.fa:FunctionalChainInvolvementFunction"
-                    id="2b61e62d-030d-437c-bc96-e769552981c1" involved="#c0dd857a-f471-40d1-bf29-af6aadaa2c6e"/>
-                <ownedFunctionalChainInvolvements xsi:type="org.polarsys.capella.core.data.fa:FunctionalChainInvolvementLink"
-                    id="3375cf26-0356-48fe-b9d0-d85d7025fad0" involved="#4af48591-381c-4b09-a671-a1b9b9edf05a"
-                    source="#2aae9773-ef15-46da-9561-2673d9507c33" target="#3bf9115b-ce9f-4fcc-a33f-85187843b093"/>
-                <ownedFunctionalChainInvolvements xsi:type="org.polarsys.capella.core.data.fa:FunctionalChainInvolvementFunction"
-                    id="3bf9115b-ce9f-4fcc-a33f-85187843b093" involved="#79b55903-8de4-4096-99e7-e8efcc1bc9da"/>
-                <ownedFunctionalChainInvolvements xsi:type="org.polarsys.capella.core.data.fa:FunctionalChainInvolvementLink"
-                    id="4318bf15-9fd6-4934-bfb1-43531fe54441" involved="#9a037fac-012d-4f0a-84e8-23a74398c903"
-                    source="#3bf9115b-ce9f-4fcc-a33f-85187843b093" target="#a07aa04a-fe40-4c10-99be-d69a6577cf6e"/>
-                <ownedFunctionalChainInvolvements xsi:type="org.polarsys.capella.core.data.fa:FunctionalChainInvolvementFunction"
-                    id="a07aa04a-fe40-4c10-99be-d69a6577cf6e" involved="#a544e463-b93e-4ce3-8ac2-49729ac0eaa9"/>
-                <ownedFunctionalChainInvolvements xsi:type="org.polarsys.capella.core.data.fa:FunctionalChainInvolvementLink"
-                    id="423f2b2f-9c7a-41c7-8dfa-8a9ad9dac998" involved="#948f76be-f2aa-4ab0-aa40-91009f9c588b"
-                    source="#a07aa04a-fe40-4c10-99be-d69a6577cf6e" target="#93318f26-164f-43c2-b388-909e93f159e7"/>
-                <ownedFunctionalChainInvolvements xsi:type="org.polarsys.capella.core.data.fa:FunctionalChainInvolvementFunction"
-                    id="93318f26-164f-43c2-b388-909e93f159e7" involved="#1828a6b7-27eb-449a-94ae-40f76c855dba"/>
-                <ownedFunctionalChainInvolvements xsi:type="org.polarsys.capella.core.data.fa:FunctionalChainInvolvementFunction"
-                    id="2aae9773-ef15-46da-9561-2673d9507c33" involved="#b04b0494-2dcf-4565-a2b7-12a611b6b582"/>
-                <ownedFunctionalChainInvolvements xsi:type="org.polarsys.capella.core.data.fa:FunctionalChainInvolvementFunction"
-                    id="efc6bb51-654d-4b5c-8b38-8614a2e9317b" involved="#3cc59848-2c76-45df-98ff-2cca6ce8a8fc"/>
-                <ownedFunctionalChainRealizations xsi:type="org.polarsys.capella.core.data.fa:FunctionalChainRealization"
-                    id="9861ba57-b3e2-48ab-abb8-7cc3f8a075cd" targetElement="#a28e1e45-f7a7-4aa0-94fc-db6cdcca8fe8"
-                    sourceElement="#16bfd537-bf86-4539-9c35-95ae4a1f6a9c"/>
-              </ownedFunctionalChains>
               <inputs xsi:type="org.polarsys.capella.core.data.fa:FunctionInputPort"
                   id="3a6427a1-0000-474b-a323-2aa53480a0d6" name="inactions">
                 <ownedPortRealizations xsi:type="org.polarsys.capella.core.data.information:PortRealization"
@@ -3608,6 +3690,20 @@
               <ownedFunctionRealizations xsi:type="org.polarsys.capella.core.data.fa:FunctionRealization"
                   id="3722ca7a-5136-4444-ade4-f2b27c9c33ba" targetElement="#39e473e1-32f8-44b5-ad0d-88fd567ae9e5"
                   sourceElement="#1828a6b7-27eb-449a-94ae-40f76c855dba"/>
+            </ownedLogicalFunctions>
+            <ownedLogicalFunctions xsi:type="org.polarsys.capella.core.data.la:LogicalFunction"
+                id="5d8f4d45-ce81-421b-a3fd-93366d4595ee" name="Execute command">
+              <inputs xsi:type="org.polarsys.capella.core.data.fa:FunctionInputPort"
+                  id="9527177e-7007-4703-940d-2e2f85ce05e3" name="FIP 1"/>
+              <outputs xsi:type="org.polarsys.capella.core.data.fa:FunctionOutputPort"
+                  id="fd333991-d96c-48f7-bec0-d23a9579cc20" name="FOP 1"/>
+            </ownedLogicalFunctions>
+            <ownedLogicalFunctions xsi:type="org.polarsys.capella.core.data.la:LogicalFunction"
+                id="f8f531b9-63d3-458c-9c78-1a98d4683305" name="Send command acknowledgement">
+              <inputs xsi:type="org.polarsys.capella.core.data.fa:FunctionInputPort"
+                  id="209c5c17-bdf1-47b8-be43-973a2870c513" name="FIP 1"/>
+              <outputs xsi:type="org.polarsys.capella.core.data.fa:FunctionOutputPort"
+                  id="2638f11a-3cb8-4dca-879c-86b9865f7af4" name="FOP 1"/>
             </ownedLogicalFunctions>
           </ownedLogicalFunctionPkgs>
         </ownedLogicalFunctions>
