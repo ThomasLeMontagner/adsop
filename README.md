@@ -6,7 +6,7 @@ ADSOP (Autonomous Deep Space Operations Platform) is an open-source platform for
 
 ## Vision
 
-Enable anyone—from students and researchers to mission engineers—to prototype, simulate and operate realistic space missions using modern software engineering practices.
+Enable anyone, from students and researchers to mission engineers,to prototype, simulate and operate realistic space missions using modern software engineering practices.
 
 ## Guiding Principles
 
