@@ -32,4 +32,5 @@ The platform should encourage experimentation, learning and collaboration.
 
 ## Capabilities
 
-TODO
+The following diagram illustrates the envisioned capabilities of ADSOP:
+![Envisioned capabilities of ADSOP](./mbse/adsop/[MCB]%20Capabilities.jpg)
