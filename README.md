@@ -33,7 +33,7 @@ The platform should encourage experimentation, learning and collaboration.
 ## Capabilities
 
 The following diagram illustrates the envisioned capabilities of ADSOP:
-![Envisioned capabilities of ADSOP](./mbse/adsop/[MCB]%20Capabilities.jpg)
+![Envisioned capabilities of ADSOP](./mbse/exports/[MCB]%20Capabilities.jpg)
 
 ## High-level architecture
 
@@ -45,4 +45,4 @@ To keep the initial implementation simple, ADSOP starts with a single Go backend
 
 The simulation environment is intentionally kept independent from the mission operations layer, allowing different simulators to be developed, replaced or extended without impacting the rest of the platform. Although ADSOP initially focuses on mission simulation, the architecture is designed so that simulated components can progressively be replaced by real spacecraft interfaces, enabling the same operational platform to support both simulated and real mission operations.
 
-![high-level architecture](./documentation/High-level%20archtiecture.png)
+![high-level architecture](./docs/architecture//High-level%20archtiecture.png)
