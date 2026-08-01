@@ -46,3 +46,5 @@ To keep the initial implementation simple, ADSOP starts with a single Go backend
 The simulation environment is intentionally kept independent from the mission operations layer, allowing different simulators to be developed, replaced or extended without impacting the rest of the platform. Although ADSOP initially focuses on mission simulation, the architecture is designed so that simulated components can progressively be replaced by real spacecraft interfaces, enabling the same operational platform to support both simulated and real mission operations.
 
 ![high-level architecture](./docs/architecture//High-level%20archtiecture.png)
+
+ADSOP uses a lightweight, container-assisted development environment. Shared services are provided through Docker Compose, while the frontend, backend, and simulators can be run directly for fast development. See 'docs/development/getting-started.md' for setup instructions.
