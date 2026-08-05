@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"sync"
@@ -14,6 +16,11 @@ type Simulation struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
+type StartSimulationRequest struct {
+	SimulationID 		string 	`json:"simulation_id"`
+	SpacecraftID 		string 	`json:"spacecraft_id"`
+	TelemetryIntervalMS	int		`json:"telemetry_interval_ms"`
+}
 type CreateSimulationRequest struct {
 	SpacecraftID string `json:"spacecraft_id"`
 }
@@ -78,6 +85,49 @@ func corsMiddleware(next http.Handler) http.Handler {
 	})
 }
 
+func startSimulator(
+	simulationID string,
+	spacecraftID string,
+) error {
+	request_body := StartSimulationRequest{
+		SimulationID: simulationID,
+		SpacecraftID: spacecraftID,
+		TelemetryIntervalMS: 1000,
+	}
+
+	body, err := json.Marshal(request_body)
+	if err != nil {
+		return fmt.Errorf("encode simulator request: %w", err)
+	}
+
+	response, err := http.Post(
+		"http://localhost:8090/simulations/start",
+		"application/json",
+		bytes.NewReader(body),
+	)
+
+	if err != nil {
+		return fmt.Errorf("call simulator: %w", err)
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode < 200 || response.StatusCode >= 300 {
+		return fmt.Errorf(
+			"simulator returned status %d",
+			response.StatusCode,
+		)
+	}
+
+	return nil
+}
+
+func (store *SimulationStore) Update(simulation Simulation) {
+	store.mu.Lock()
+	defer store.mu.Unlock()
+
+	store.simulations[simulation.ID] = simulation
+}
+
 func main() {
 	store := NewSimulationStore()
 	server_mux := http.NewServeMux()
@@ -106,7 +156,16 @@ func main() {
 		}
 
 		simulation := store.Create()
+		
+		if err := startSimulator(simulation.ID, request.SpacecraftID); err != nil {
+			writeJSON(writer, http.StatusBadGateway, map[string]string {
+				"error": err.Error(),
+			})
+			return
+		}
 
+		simulation.Status = "running"
+		store.Update(simulation)
 		writeJSON(writer, http.StatusCreated, simulation)
 	})
 
