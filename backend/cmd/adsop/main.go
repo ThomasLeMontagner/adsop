@@ -139,16 +139,16 @@ func main() {
 	})
 
 	server_mux.HandleFunc("POST /simulations", func(writer http.ResponseWriter, request_ *http.Request) {
-		var request CreateSimulationRequest
+		var simulation_request CreateSimulationRequest
 
-		if err := json.NewDecoder(request_.Body).Decode(&request); err != nil {
+		if err := json.NewDecoder(request_.Body).Decode(&simulation_request); err != nil {
 			writeJSON(writer, http.StatusBadRequest, map[string]string{
 				"error": "invalid JSON request",
 			})
 			return
 		}
 
-		if request.SpacecraftID == "" {
+		if simulation_request.SpacecraftID == "" {
 			writeJSON(writer, http.StatusBadRequest, map[string]string{
 				"error": "spacecraft_id is required",
 			})
@@ -157,7 +157,7 @@ func main() {
 
 		simulation := store.Create()
 		
-		if err := startSimulator(simulation.ID, request.SpacecraftID); err != nil {
+		if err := startSimulator(simulation.ID, simulation_request.SpacecraftID); err != nil {
 			writeJSON(writer, http.StatusBadGateway, map[string]string {
 				"error": err.Error(),
 			})
