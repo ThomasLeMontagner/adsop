@@ -36,6 +36,38 @@ func NewSimulationStore() *SimulationStore {
 	}
 }
 
+type Telemetry struct {
+	SimulationID	string	`json:"simulation_id"`
+	SpacecraftID	string	`json:"spacecraft_id"`
+	BatteryVoltage	float64	`json:"battery_voltage"`
+}
+
+type TelemetryStore struct {
+	mu sync.RWMutex
+	latest map[string]Telemetry
+}
+
+func NewTelemetryStore() *TelemetryStore {
+	return &TelemetryStore {
+		latest: make(map[string]Telemetry),
+	}
+}
+
+func (store *TelemetryStore) Update(telemetry Telemetry) {
+	store.mu.Lock()
+	defer store.mu.Unlock(telemetry.SimulationID) = telemetry
+
+	store.latest[]
+}
+
+func (store *TelemetryStore) Get(simulationID Simulation) (Telemetry, bool) {
+	store.mu.RLock()
+	defer store.mu.RUnlock()
+
+	telemetry, found := store.latest[simulationID.ID]
+	return telemetry, found
+}
+
 func (store *SimulationStore) Create() Simulation {
 	store.mu.Lock()
 	defer store.mu.Unlock()
@@ -129,7 +161,7 @@ func (store *SimulationStore) Update(simulation Simulation) {
 }
 
 func main() {
-	store := NewSimulationStore()
+	simulation_store := NewSimulationStore()
 	server_mux := http.NewServeMux()
 
 	server_mux.HandleFunc("GET /health", func(writer http.ResponseWriter, request *http.Request) {
@@ -155,7 +187,7 @@ func main() {
 			return
 		}
 
-		simulation := store.Create()
+		simulation := simulation_store.Create()
 		
 		if err := startSimulator(simulation.ID, simulation_request.SpacecraftID); err != nil {
 			writeJSON(writer, http.StatusBadGateway, map[string]string {
@@ -165,14 +197,14 @@ func main() {
 		}
 
 		simulation.Status = "running"
-		store.Update(simulation)
+		simulation_store.Update(simulation)
 		writeJSON(writer, http.StatusCreated, simulation)
 	})
 
 	server_mux.HandleFunc("GET /simulations/{id}", func(writer http.ResponseWriter, request *http.Request){
 		id := request.PathValue("id")
 
-		simulation, exists := store.simulations[id]
+		simulation, exists := simulation_store.simulations[id]
 
 		if exists{
 			writeJSON(writer, http.StatusOK, simulation)
@@ -195,4 +227,38 @@ func main() {
 	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		log.Fatal(err)
 	}
+
+	telemetry_store := NewTelemetryStore()
+
+	server_mux.HandleFunc("POST /internal/telemetry", func(writer http.ResponseWriter, request *http.Request) {
+		var telemetry Telemetry
+
+		if err := json.NewDecoder(request.Body).Decode(&telemetry); err :! nil {
+			writeJSON(writer, http.StatusBadRequest, map[string]string{
+				"error": "invalid telemetry",
+			})
+			return
+		}
+
+		telemetry_store.Update(telemetry)
+
+		writerJSon(writer, http.StatusAccepted, map[string]string{
+			"status": "accepted"
+		})
+	})
+
+	server_mux.HandleFunc("GET /simulations/{id}/telemetry", func(writer http.ResponseWriter, request *http.Request)  {
+		id := request.PathValue("id")
+		
+		telemetry, found := telemetry_store.latest[id]
+
+		if found {
+			writeJSON(writer, http.StatusOK, telemetry)
+		} else {
+			writeJSON(writer, http.StatusNotFound, map[string]string{
+				"error": "no telemetry available",
+			})
+			return
+		}
+	})
 }
