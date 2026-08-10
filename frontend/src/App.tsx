@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type Simulation = {
   id: string;
@@ -6,10 +6,41 @@ type Simulation = {
   created_at: string;
 };
 
+type Telemetry = {
+  simulation_id: string;
+  spacecraft_id: string;
+  battery_voltage: number;
+};
+
+
+
 function App() {
   const [simulation, setSimulation] = useState<Simulation | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [telemetry, SetTelemetry] = useState<Telemetry | null>(null);
+
+  useEffect(() => {
+    const socket = new WebSocket("ws://localhost:8080/ws");
+
+    socket.onopen = () => {
+      console.log("Connected to ADSOP telemetry stream");
+    };
+
+    socket.onmessage = (event) => {
+      const telemetry: Telemetry = JSON.parse(event.data);
+
+      SetTelemetry(telemetry);
+    };
+
+    socket.onerror = (event) => {
+      console.log("Disconnected from ADSOP telemetry stream");
+    };
+
+    return () => {
+      socket.close();
+    };
+  }, []);
 
   async function createSimulation() {
     setIsCreating(true);
@@ -66,6 +97,21 @@ function App() {
           </p>
         </section>
       )}
+
+      {telemetry && (
+          <section>
+            <h2>Live telemetry</h2>
+
+            <p>
+              <strong>Spacecraft:</strong>{telemetry.spacecraft_id}
+            </p>
+            <p>
+              <strong>Battery voltage:</strong>{" "}
+              {telemetry.battery_voltage.toFixed(2)} V
+            </p>
+          </section>
+        )
+      }
     </main>
   );
 }
