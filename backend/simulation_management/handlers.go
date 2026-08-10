@@ -17,20 +17,12 @@ func handleCreateSimulation(simulationStore *SimulationStore) http.HandlerFunc {
 		if err := json.NewDecoder(request.Body).Decode(
 			&simulationRequest,
 		); err != nil {
-			writeJSON(
-				writer,
-				http.StatusBadRequest,
-				map[string]string{"error": "invalid JSON request"},
-			)
+			writeJSON(writer, http.StatusBadRequest, map[string]string{"error": "invalid JSON request"})
 			return
 		}
 
 		if simulationRequest.SpacecraftID == "" {
-			writeJSON(
-				writer,
-				http.StatusBadRequest,
-				map[string]string{"error": "spacecraft_id is required"},
-			)
+			writeJSON(writer, http.StatusBadRequest, map[string]string{"error": "spacecraft_id is required"})
 			return
 		}
 
@@ -40,22 +32,14 @@ func handleCreateSimulation(simulationStore *SimulationStore) http.HandlerFunc {
 			simulation.ID,
 			simulationRequest.SpacecraftID,
 		); err != nil {
-			writeJSON(
-				writer,
-				http.StatusBadGateway,
-				map[string]string{"error": err.Error()},
-			)
+			writeJSON(writer, http.StatusBadGateway, map[string]string{"error": err.Error()})
 			return
 		}
 
 		simulation.Status = "running"
 		simulationStore.Update(simulation)
 
-		writeJSON(
-			writer,
-			http.StatusCreated,
-			simulation,
-		)
+		writeJSON(writer, http.StatusCreated, simulation)
 	}
 }
 
@@ -69,11 +53,7 @@ func handleGetSimulation(simulationStore *SimulationStore) http.HandlerFunc {
 		simulation, found := simulationStore.Get(id)
 
 		if !found {
-			writeJSON(
-				writer,
-				http.StatusNotFound,
-				map[string]string{"error": "simulation not found"},
-			)
+			writeJSON(writer, http.StatusNotFound, map[string]string{"error": "simulation not found"})
 			return
 		}
 
@@ -91,13 +71,7 @@ func handleTelemetryIngest(telemetryStore *TelemetryStore, webSocketHub *WebSock
 		if err := json.NewDecoder(request.Body).Decode(
 			&telemetry,
 		); err != nil {
-			writeJSON(
-				writer,
-				http.StatusBadRequest,
-				map[string]string{
-					"error": "invalid telemetry",
-				},
-			)
+			writeJSON(writer, http.StatusBadRequest, map[string]string{"error": "invalid telemetry"})
 			return
 		}
 
@@ -105,13 +79,7 @@ func handleTelemetryIngest(telemetryStore *TelemetryStore, webSocketHub *WebSock
 
 		webSocketHub.Broadcast(telemetry)
 
-		writeJSON(
-			writer,
-			http.StatusAccepted,
-			map[string]string{
-				"status": "accepted",
-			},
-		)
+		writeJSON(writer, http.StatusAccepted, map[string]string{"status": "accepted"})
 	}
 }
 
@@ -125,13 +93,7 @@ func handleGetTelemetry(telemetryStore *TelemetryStore) http.HandlerFunc {
 		telemetry, found := telemetryStore.Get(id)
 
 		if !found {
-			writeJSON(
-				writer,
-				http.StatusNotFound,
-				map[string]string{
-					"error": "no telemetry available",
-				},
-			)
+			writeJSON(writer, http.StatusNotFound, map[string]string{"error": "no telemetry available"})
 			return
 		}
 
@@ -144,7 +106,7 @@ func handleGetWebSocket(webSocketHub *WebSocketHub) http.HandlerFunc {
 		writer http.ResponseWriter,
 		request *http.Request,
 	) {
-		conn, err := websocket.Accept(
+		connection, err := websocket.Accept(
 			writer,
 			request,
 			&websocket.AcceptOptions{
@@ -156,15 +118,15 @@ func handleGetWebSocket(webSocketHub *WebSocketHub) http.HandlerFunc {
 			return
 		}
 
-		webSocketHub.Add(conn)
+		webSocketHub.Add(connection)
 
 		defer func() {
-			webSocketHub.Remove(conn)
-			conn.Close(websocket.StatusNormalClosure, "")
+			webSocketHub.Remove(connection)
+			connection.Close(websocket.StatusNormalClosure, "")
 		}()
 
 		for {
-			_, _, err := conn.Read(request.Context())
+			_, _, err := connection.Read(request.Context())
 			if err != nil {
 				break
 			}
