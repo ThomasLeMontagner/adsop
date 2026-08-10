@@ -3,11 +3,11 @@ package main
 import (
 	"encoding/json"
 	"net/http"
+
+	"github.com/coder/websocket"
 )
 
-func handleCreateSimulation(
-	simulationStore *SimulationStore,
-) http.HandlerFunc {
+func handleCreateSimulation(simulationStore *SimulationStore) http.HandlerFunc {
 	return func(
 		writer http.ResponseWriter,
 		request *http.Request,
@@ -28,7 +28,7 @@ func handleCreateSimulation(
 		if simulationRequest.SpacecraftID == "" {
 			writeJSON(
 				writer,
-				http.StatusBadRequest, 
+				http.StatusBadRequest,
 				map[string]string{"error": "spacecraft_id is required"},
 			)
 			return
@@ -59,9 +59,7 @@ func handleCreateSimulation(
 	}
 }
 
-func handleGetSimulation(
-	simulationStore *SimulationStore,
-) http.HandlerFunc {
+func handleGetSimulation(simulationStore *SimulationStore) http.HandlerFunc {
 	return func(
 		writer http.ResponseWriter,
 		request *http.Request,
@@ -83,9 +81,7 @@ func handleGetSimulation(
 	}
 }
 
-func handleTelemetryIngest(
-	telemetryStore *TelemetryStore,
-) http.HandlerFunc {
+func handleTelemetryIngest(telemetryStore *TelemetryStore, webSocketHub *WebSocketHub) http.HandlerFunc {
 	return func(
 		writer http.ResponseWriter,
 		request *http.Request,
@@ -107,6 +103,8 @@ func handleTelemetryIngest(
 
 		telemetryStore.Update(telemetry)
 
+		webSocketHub.Broadcast(telemetry)
+
 		writeJSON(
 			writer,
 			http.StatusAccepted,
@@ -117,9 +115,7 @@ func handleTelemetryIngest(
 	}
 }
 
-func handleGetTelemetry(
-	telemetryStore *TelemetryStore,
-) http.HandlerFunc {
+func handleGetTelemetry(telemetryStore *TelemetryStore) http.HandlerFunc {
 	return func(
 		writer http.ResponseWriter,
 		request *http.Request,
@@ -140,5 +136,38 @@ func handleGetTelemetry(
 		}
 
 		writeJSON(writer, http.StatusOK, telemetry)
+	}
+}
+
+func handleGetWebSocket(webSocketHub *WebSocketHub) http.HandlerFunc {
+	return func(
+		writer http.ResponseWriter,
+		request *http.Request,
+	) {
+		conn, err := websocket.Accept(
+			writer,
+			request,
+			&websocket.AcceptOptions{
+				OriginPatterns: []string{"localhost:*"},
+			},
+		)
+
+		if err != nil {
+			return
+		}
+
+		webSocketHub.Add(conn)
+
+		defer func() {
+			webSocketHub.Remove(conn)
+			conn.Close(websocket.StatusNormalClosure, "")
+		}()
+
+		for {
+			_, _, err := conn.Read(request.Context())
+			if err != nil {
+				break
+			}
+		}
 	}
 }

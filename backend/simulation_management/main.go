@@ -9,6 +9,7 @@ import (
 func main() {
 	simulationStore := NewSimulationStore()
 	telemetryStore := NewTelemetryStore()
+	webSocketHub := NewWebSocketHub()
 
 	serverMux := http.NewServeMux()
 
@@ -18,9 +19,7 @@ func main() {
 			writeJSON(
 				writer,
 				http.StatusOK,
-				map[string]string{
-					"status": "ok",
-				},
+				map[string]string{"status": "ok"},
 			)
 		},
 	)
@@ -37,12 +36,16 @@ func main() {
 
 	serverMux.HandleFunc(
 		"POST /internal/telemetry",
-		handleTelemetryIngest(telemetryStore),
+		handleTelemetryIngest(telemetryStore, webSocketHub),
 	)
 
 	serverMux.HandleFunc(
 		"GET /simulations/{id}/telemetry",
 		handleGetTelemetry(telemetryStore),
+	)
+	serverMux.HandleFunc(
+		"GET /ws",
+		handleGetWebSocket(webSocketHub),
 	)
 
 	server := &http.Server{
