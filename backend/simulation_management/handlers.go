@@ -20,9 +20,7 @@ func handleCreateSimulation(
 			writeJSON(
 				writer,
 				http.StatusBadRequest,
-				map[string]string{
-					"error": "invalid JSON request",
-				},
+				map[string]string{"error": "invalid JSON request"},
 			)
 			return
 		}
@@ -30,10 +28,8 @@ func handleCreateSimulation(
 		if simulationRequest.SpacecraftID == "" {
 			writeJSON(
 				writer,
-				http.StatusBadRequest,
-				map[string]string{
-					"error": "spacecraft_id is required",
-				},
+				http.StatusBadRequest, 
+				map[string]string{"error": "spacecraft_id is required"},
 			)
 			return
 		}
@@ -47,9 +43,7 @@ func handleCreateSimulation(
 			writeJSON(
 				writer,
 				http.StatusBadGateway,
-				map[string]string{
-					"error": err.Error(),
-				},
+				map[string]string{"error": err.Error()},
 			)
 			return
 		}
@@ -80,9 +74,7 @@ func handleGetSimulation(
 			writeJSON(
 				writer,
 				http.StatusNotFound,
-				map[string]string{
-					"error": "simulation not found",
-				},
+				map[string]string{"error": "simulation not found"},
 			)
 			return
 		}
