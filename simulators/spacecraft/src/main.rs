@@ -78,7 +78,7 @@ async fn start_simulation(
             let telemetry = SpacecraftTelemetry {
                 simulation_id: simulation_id.clone(),
                 spacecraft_id: spacecraft_id.clone(),
-                mode: Mode::Normal,
+                mode: Mode::Nominal,
                 components: vec![power_system_telemetry],
             };
 

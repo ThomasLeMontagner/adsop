@@ -2,7 +2,7 @@ use serde::Serialize;
 
 #[derive(Debug, Serialize)]
 pub enum Mode {
-    Normal,
+    Nominal,
     Degraded,
     Safe,
 }
