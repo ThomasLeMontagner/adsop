@@ -1,10 +1,16 @@
+pub mod modules;
+
+use modules::telemetry::SpacecraftTelemetry;
+
 use axum::{
-    Json, Router,
-    routing::{get, post},
+    routing::{get, post}, Json,
+    Router,
 };
 use serde::{Deserialize, Serialize};
 use std::{net::SocketAddr, time::Duration};
 use tokio::time;
+use crate::modules::mode::Mode;
+use crate::modules::systems::{Component, PowerSystem};
 
 #[derive(Debug, Deserialize)]
 struct StartSimulationRequest {
@@ -22,13 +28,6 @@ struct StartSimulationResponse {
 #[derive(Debug, Serialize)]
 struct HealthResponse {
     status: &'static str,
-}
-
-#[derive(Debug, Serialize)]
-struct Telemetry {
-    simulation_id: String,
-    spacecraft_id: String,
-    battery_voltage: f64,
 }
 
 #[tokio::main]
@@ -62,19 +61,25 @@ async fn start_simulation(
     let interval_ms = request.telemetry_interval_ms.clone();
     let client = reqwest::Client::new();
 
-    tokio::spawn(async move {
-        let mut battery_voltage = 28.0;
-        let mut interval = time::interval(Duration::from_millis(interval_ms));
 
+    tokio::spawn(async move {
+        let mut power_system = PowerSystem{
+            name: String::from("Power System"),
+            battery_voltage: 28.0,
+            temperature: 15.0 ,
+        };
+
+        let mut interval = time::interval(Duration::from_millis(interval_ms));
         loop {
             interval.tick().await;
 
-            battery_voltage -= 0.01;
-
-            let telemetry = Telemetry {
+            power_system.update();
+            let power_system_telemetry = power_system.produce_data();
+            let telemetry = SpacecraftTelemetry {
                 simulation_id: simulation_id.clone(),
                 spacecraft_id: spacecraft_id.clone(),
-                battery_voltage,
+                mode: Mode::Normal,
+                components: vec![power_system_telemetry],
             };
 
             let result = client

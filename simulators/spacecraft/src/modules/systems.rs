@@ -33,3 +33,9 @@ impl Component for PowerSystem {
         }
     }
 }
+
+impl PowerSystem {
+    pub fn update(&mut self) {
+        self.battery_voltage -= 0.1;
+    }
+}
