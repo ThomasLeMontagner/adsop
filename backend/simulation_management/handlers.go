@@ -66,7 +66,7 @@ func handleTelemetryIngest(telemetryStore *TelemetryStore, webSocketHub *WebSock
 		writer http.ResponseWriter,
 		request *http.Request,
 	) {
-		var telemetry Telemetry
+		var telemetry SpacecraftTelemetry
 
 		if err := json.NewDecoder(request.Body).Decode(
 			&telemetry,
@@ -76,9 +76,7 @@ func handleTelemetryIngest(telemetryStore *TelemetryStore, webSocketHub *WebSock
 		}
 
 		telemetryStore.Update(telemetry)
-
 		webSocketHub.Broadcast(telemetry)
-
 		writeJSON(writer, http.StatusAccepted, map[string]string{"status": "accepted"})
 	}
 }

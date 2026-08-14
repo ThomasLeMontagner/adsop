@@ -4,10 +4,15 @@ use serde::Serialize;
 
 /// Represents a value contained in a telemetry data point.
 #[derive(Debug, Serialize)]
+#[serde(tag = "type", content = "value")]
 pub enum DataValue {
+    #[serde(rename = "float")]
     Float(f32),
+    #[serde(rename = "boolean")]
     Boolean(bool),
+    #[serde(rename = "integer")]
     Integer(i32),
+    #[serde(rename = "text")]
     Text(String),
 }
 

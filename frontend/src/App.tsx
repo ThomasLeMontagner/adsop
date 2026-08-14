@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { Component, useEffect, useState } from "react";
 
 type Simulation = {
   id: string;
@@ -6,19 +6,36 @@ type Simulation = {
   created_at: string;
 };
 
-type Telemetry = {
+type Mode = "Nominal" | "Degraded" | "Safe"
+
+type DataValue = {
+  type: string
+  value: unknown
+}
+
+type Data = {
+  name: string;
+  value: DataValue;
+}
+
+type ComponentTelemetry = {
+  component_name: string;
+  data: Data[];
+}
+
+type SpacecraftTelemetry = {
   simulation_id: string;
   spacecraft_id: string;
-  battery_voltage: number;
+  mode: Mode;
+  components: ComponentTelemetry[];
 };
-
 
 
 function App() {
   const [simulation, setSimulation] = useState<Simulation | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [telemetry, SetTelemetry] = useState<Telemetry | null>(null);
+  const [telemetry, SetTelemetry] = useState<SpacecraftTelemetry | null>(null);
 
   useEffect(() => {
     const socket = new WebSocket("ws://localhost:8080/ws");
@@ -28,12 +45,12 @@ function App() {
     };
 
     socket.onmessage = (event) => {
-      const telemetry: Telemetry = JSON.parse(event.data);
+      const telemetry: SpacecraftTelemetry = JSON.parse(event.data);
 
       SetTelemetry(telemetry);
     };
 
-    socket.onerror = (event) => {
+    socket.onerror = (_) => {
       console.log("Disconnected from ADSOP telemetry stream");
     };
 
@@ -99,18 +116,30 @@ function App() {
       )}
 
       {telemetry && (
-          <section>
-            <h2>Live telemetry</h2>
+        <section>
+          <h2>Live telemetry</h2>
 
-            <p>
-              <strong>Spacecraft:</strong>{telemetry.spacecraft_id}
-            </p>
-            <p>
-              <strong>Battery voltage:</strong>{" "}
-              {telemetry.battery_voltage.toFixed(2)} V
-            </p>
-          </section>
-        )
+          <p>
+            <strong>Spacecraft:</strong> {telemetry.spacecraft_id}
+          </p>
+
+          <p>
+            <strong>Mode:</strong> {telemetry.mode}
+          </p>
+
+          {telemetry.components.map((component) => (
+            <div key={component.component_name}>
+              <h3>{component.component_name}</h3>
+
+              {component.data.map((data) => (
+                <p key={data.name}>
+                  <strong>{data.name}:</strong> {String(data.value.value)}
+                </p>
+              ))}
+            </div>
+          ))}
+        </section>
+      )
       }
     </main>
   );
