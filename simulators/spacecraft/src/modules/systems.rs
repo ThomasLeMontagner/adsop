@@ -43,7 +43,7 @@ const DEGRADED_SOC_THRESHOLD: f32 = 0.40;
 const SAFE_SOC_THRESHOLD: f32 = 0.20;
 
 impl PowerSystem {
-    /// Update the battery voltage (in a dumb way).
+    /// Update the battery energy based of energy consumption and generation.
     pub fn update(&mut self, dt_seconds: f32) {
         let generated_power_w = if self.solar_array_generating_power { SOLAR_ARRAY_GENERATED_POWER_W } else {0.0};
         let net_power = generated_power_w - self.consumed_power_w;
@@ -66,6 +66,7 @@ pub struct Spacecraft {
 }
 
 impl Spacecraft {
+    /// Derived the mode of the aircraft based on the state of charge.
     pub fn mode(&self) -> Mode {
         let state_of_charge = self.power_system.state_of_charge();
 
