@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 use std::{net::SocketAddr, time::Duration};
 use tokio::time;
 use crate::modules::mode::Mode;
-use crate::modules::systems::{Component, PowerSystem};
+use crate::modules::systems::{Component, PowerSystem, Spacecraft};
 
 #[derive(Debug, Deserialize)]
 struct StartSimulationRequest {
@@ -63,26 +63,29 @@ async fn start_simulation(
 
 
     tokio::spawn(async move {
-        let mut power_system = PowerSystem{
-            name: String::from("Power System"),
-            battery_capacity_wh: 1500.0,
-            battery_energy_wh: 1400.0,
-            consumed_power_w: 350.0,
-            solar_array_generating_power: false,
-            battery_temperature: 15.0 ,
+        let mut spacecraft = Spacecraft {
+            id: spacecraft_id.clone(),
+            power_system: PowerSystem {
+                name: String::from("Power System"),
+                battery_capacity_wh: 1500.0,
+                battery_energy_wh: 1400.0,
+                consumed_power_w: 350.0,
+                solar_array_generating_power: false,
+                battery_temperature: 15.0,
+            },
         };
-
         let mut interval = time::interval(Duration::from_millis(interval_ms));
         loop {
             interval.tick().await;
 
             let dt_seconds = interval_ms as f32 / 1000.0;
-            power_system.update(dt_seconds);
-            let power_system_telemetry = power_system.produce_data();
+            spacecraft.power_system.update(dt_seconds);
+
+            let power_system_telemetry = spacecraft.power_system.produce_data();
             let telemetry = SpacecraftTelemetry {
                 simulation_id: simulation_id.clone(),
                 spacecraft_id: spacecraft_id.clone(),
-                mode: Mode::Nominal,
+                mode: spacecraft.mode(),
                 components: vec![power_system_telemetry],
             };
 

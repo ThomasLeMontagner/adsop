@@ -1,8 +1,5 @@
-use crate::modules::telemetry::{
-    ComponentTelemetry,
-    Data,
-    DataValue,
-};
+use crate::modules::mode::Mode;
+use crate::modules::telemetry::{ComponentTelemetry, Data, DataValue, SpacecraftTelemetry};
 
 /// Defines the behavior shared by spacecraft components.
 pub trait Component {
@@ -42,6 +39,9 @@ const MIN_BATTERY_VOLTAGE: f32 = 24.0;
 const MAX_BATTERY_VOLTAGE: f32 = 28.0;
 const SOLAR_ARRAY_GENERATED_POWER_W: f32 = 600.0;
 
+const DEGRADED_SOC_THRESHOLD: f32 = 0.40;
+const SAFE_SOC_THRESHOLD: f32 = 0.20;
+
 impl PowerSystem {
     /// Update the battery voltage (in a dumb way).
     pub fn update(&mut self, dt_seconds: f32) {
@@ -57,5 +57,24 @@ impl PowerSystem {
 
     fn battery_voltage(&self) -> f32 {
         MIN_BATTERY_VOLTAGE + self.state_of_charge() * (MAX_BATTERY_VOLTAGE - MIN_BATTERY_VOLTAGE)
+    }
+}
+
+pub struct Spacecraft {
+    pub id: String,
+    pub power_system: PowerSystem,
+}
+
+impl Spacecraft {
+    pub fn mode(&self) -> Mode {
+        let state_of_charge = self.power_system.state_of_charge();
+
+        if state_of_charge <= SAFE_SOC_THRESHOLD {
+            Mode::Safe
+        } else if state_of_charge <= DEGRADED_SOC_THRESHOLD {
+            Mode::Degraded
+        } else {
+            Mode::Nominal
+        }
     }
 }
