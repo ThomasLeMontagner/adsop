@@ -65,15 +65,19 @@ async fn start_simulation(
     tokio::spawn(async move {
         let mut power_system = PowerSystem{
             name: String::from("Power System"),
-            battery_voltage: 28.0,
-            temperature: 15.0 ,
+            battery_capacity_wh: 1500.0,
+            battery_energy_wh: 1400.0,
+            consumed_power_w: 350.0,
+            solar_array_generating_power: false,
+            battery_temperature: 15.0 ,
         };
 
         let mut interval = time::interval(Duration::from_millis(interval_ms));
         loop {
             interval.tick().await;
 
-            power_system.update();
+            let dt_seconds = interval_ms as f32 / 1000.0;
+            power_system.update(dt_seconds);
             let power_system_telemetry = power_system.produce_data();
             let telemetry = SpacecraftTelemetry {
                 simulation_id: simulation_id.clone(),
