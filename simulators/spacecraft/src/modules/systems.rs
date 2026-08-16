@@ -39,8 +39,14 @@ const MIN_BATTERY_VOLTAGE: f32 = 24.0;
 const MAX_BATTERY_VOLTAGE: f32 = 28.0;
 const SOLAR_ARRAY_GENERATED_POWER_W: f32 = 600.0;
 
-const DEGRADED_SOC_THRESHOLD: f32 = 0.40;
-const SAFE_SOC_THRESHOLD: f32 = 0.20;
+const LOW_BATTERY_THRESHOLD: f32 = 0.40;
+const CRITICAL_BATTERY_THRESHOLD: f32 = 0.20;
+
+#[derive(Debug)]
+pub enum PowerAnomaly {
+    BatteryLow,
+    BatteryCritical,
+}
 
 impl PowerSystem {
     /// Update the battery energy based of energy consumption and generation.
@@ -58,24 +64,53 @@ impl PowerSystem {
     fn battery_voltage(&self) -> f32 {
         MIN_BATTERY_VOLTAGE + self.state_of_charge() * (MAX_BATTERY_VOLTAGE - MIN_BATTERY_VOLTAGE)
     }
+
+    /// Derived the anomaly of the power system based on the state of charge.
+    pub fn anomaly(&self) -> Option<PowerAnomaly> {
+        let state_of_charge = self.state_of_charge();
+
+        if state_of_charge <= CRITICAL_BATTERY_THRESHOLD {
+            Some(PowerAnomaly::BatteryCritical)
+        } else if state_of_charge <= LOW_BATTERY_THRESHOLD {
+            Some(PowerAnomaly::BatteryLow)
+        } else {
+            None
+        }
+    }
 }
 
 pub struct Spacecraft {
     pub id: String,
     pub power_system: PowerSystem,
+    mode: Mode,
 }
 
 impl Spacecraft {
-    /// Derived the mode of the aircraft based on the state of charge.
-    pub fn mode(&self) -> Mode {
-        let state_of_charge = self.power_system.state_of_charge();
-
-        if state_of_charge <= SAFE_SOC_THRESHOLD {
-            Mode::Safe
-        } else if state_of_charge <= DEGRADED_SOC_THRESHOLD {
-            Mode::Degraded
-        } else {
-            Mode::Nominal
+    pub fn new(id: String, power_system: PowerSystem) -> Self {
+        Self {
+            id,
+            power_system,
+            mode: Mode::Nominal,
         }
+    }
+
+    /// Returns the mode of the spacecraft.
+    pub fn mode (&self) -> Mode {self.mode}
+
+    /// Derives the spacecraft mode from the power anomaly.
+    pub fn evaluate_autonomous_rules(&mut self) {
+        match self.power_system.anomaly() {
+            Some(PowerAnomaly::BatteryCritical) => {
+                self.mode = Mode::Safe
+            }
+            Some(PowerAnomaly::BatteryLow) => {
+                self.mode = Mode::Degraded
+            }
+            None => {}
+        }
+    }
+
+    pub fn enter_safe_mode(&mut self) {
+        self.mode = Mode::Safe;
     }
 }

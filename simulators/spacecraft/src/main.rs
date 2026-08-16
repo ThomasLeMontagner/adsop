@@ -63,9 +63,9 @@ async fn start_simulation(
 
 
     tokio::spawn(async move {
-        let mut spacecraft = Spacecraft {
-            id: spacecraft_id.clone(),
-            power_system: PowerSystem {
+        let mut spacecraft = Spacecraft::new (
+            spacecraft_id.clone(),
+            PowerSystem {
                 name: String::from("Power System"),
                 battery_capacity_wh: 1500.0,
                 battery_energy_wh: 1400.0,
@@ -73,14 +73,14 @@ async fn start_simulation(
                 solar_array_generating_power: false,
                 battery_temperature: 15.0,
             },
-        };
+        );
         let mut interval = time::interval(Duration::from_millis(interval_ms));
         loop {
             interval.tick().await;
 
             let dt_seconds = interval_ms as f32 / 1000.0;
             spacecraft.power_system.update(dt_seconds);
-
+            spacecraft.evaluate_autonomous_rules();
             let power_system_telemetry = spacecraft.power_system.produce_data();
             let telemetry = SpacecraftTelemetry {
                 simulation_id: simulation_id.clone(),
