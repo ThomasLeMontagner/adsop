@@ -1,4 +1,5 @@
-use crate::modules::anomalies::PowerAnomaly;
+use crate::modules::anomalies::Anomaly;
+use crate::modules::component::Component;
 use crate::modules::mode::Mode;
 use crate::modules::power_system::PowerSystem;
 
@@ -18,18 +19,18 @@ impl Spacecraft {
     }
 
     /// Returns the mode of the spacecraft.
-    pub fn mode (&self) -> Mode {self.mode}
+    pub fn mode(&self) -> Mode {
+        self.mode
+    }
 
     /// Derives the spacecraft mode from the power anomaly.
     pub fn evaluate_autonomous_rules(&mut self) {
-        match self.power_system.anomaly() {
-            Some(PowerAnomaly::BatteryCritical) => {
-                self.mode = Mode::Safe
-            }
-            Some(PowerAnomaly::BatteryLow) => {
-                self.mode = Mode::Degraded
-            }
-            None => {}
+        let anomalies = self.power_system.check_health();
+
+        if anomalies.contains(&Anomaly::BatteryCritical) {
+            self.mode = Mode::Safe;
+        } else if anomalies.contains(&Anomaly::BatteryLow) {
+            self.mode = Mode::Degraded;
         }
     }
 

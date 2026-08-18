@@ -2,16 +2,16 @@ pub mod modules;
 
 use modules::telemetry::SpacecraftTelemetry;
 
+use crate::modules::spacecraft::Spacecraft;
 use axum::{
-    routing::{get, post}, Json,
-    Router,
+    Json, Router,
+    routing::{get, post},
 };
+use modules::component::Component;
+use modules::power_system::PowerSystem;
 use serde::{Deserialize, Serialize};
 use std::{net::SocketAddr, time::Duration};
 use tokio::time;
-use modules::component::Component;
-use modules::power_system::PowerSystem;
-use crate::modules::spacecraft::Spacecraft;
 
 #[derive(Debug, Deserialize)]
 struct StartSimulationRequest {
@@ -62,9 +62,8 @@ async fn start_simulation(
     let interval_ms = request.telemetry_interval_ms.clone();
     let client = reqwest::Client::new();
 
-
     tokio::spawn(async move {
-        let mut spacecraft = Spacecraft::new (
+        let mut spacecraft = Spacecraft::new(
             spacecraft_id.clone(),
             PowerSystem {
                 name: String::from("Power System"),

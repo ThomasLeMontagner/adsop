@@ -1,5 +1,6 @@
-#[derive(Debug)]
-pub enum PowerAnomaly {
+#[derive(Debug, PartialEq, Eq)]
+pub enum Anomaly {
     BatteryLow,
     BatteryCritical,
+    BatteryOverheating,
 }
