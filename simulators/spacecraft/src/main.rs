@@ -9,8 +9,9 @@ use axum::{
 use serde::{Deserialize, Serialize};
 use std::{net::SocketAddr, time::Duration};
 use tokio::time;
-use crate::modules::mode::Mode;
-use crate::modules::systems::{Component, PowerSystem, Spacecraft};
+use modules::component::Component;
+use modules::power_system::PowerSystem;
+use crate::modules::spacecraft::Spacecraft;
 
 #[derive(Debug, Deserialize)]
 struct StartSimulationRequest {
@@ -81,7 +82,7 @@ async fn start_simulation(
             let dt_seconds = interval_ms as f32 / 1000.0;
             spacecraft.power_system.update(dt_seconds);
             spacecraft.evaluate_autonomous_rules();
-            let power_system_telemetry = spacecraft.power_system.produce_data();
+            let power_system_telemetry = spacecraft.power_system.produce_telemetry();
             let telemetry = SpacecraftTelemetry {
                 simulation_id: simulation_id.clone(),
                 spacecraft_id: spacecraft_id.clone(),
