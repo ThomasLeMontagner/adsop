@@ -24,6 +24,7 @@ impl Spacecraft {
     }
 
     /// Derives the spacecraft mode from the power anomaly.
+    /// TODO report change of state in the telemetry.
     pub fn evaluate_autonomous_rules(&mut self) {
         let anomalies = self.power_system.check_health();
 

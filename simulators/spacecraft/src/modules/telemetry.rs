@@ -1,6 +1,7 @@
 use crate::modules::mode::Mode;
 
 use serde::Serialize;
+use crate::modules::events::Event;
 
 /// Represents a value contained in a telemetry data point.
 #[derive(Debug, Serialize)]
@@ -31,10 +32,12 @@ pub struct ComponentTelemetry {
 }
 
 /// Represents a complete spacecraft telemetry packet.
+/// TODO: include datetime of the telemetry packet? create a ADR for it
 #[derive(Debug, Serialize)]
 pub struct SpacecraftTelemetry {
     pub simulation_id: String,
     pub spacecraft_id: String,
     pub mode: Mode,
     pub components: Vec<ComponentTelemetry>,
+    pub events: Vec<Event>,
 }

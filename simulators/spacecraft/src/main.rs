@@ -87,6 +87,7 @@ async fn start_simulation(
                 spacecraft_id: spacecraft_id.clone(),
                 mode: spacecraft.mode(),
                 components: vec![power_system_telemetry],
+                events: vec![],
             };
 
             let result = client
