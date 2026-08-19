@@ -1,5 +1,5 @@
-use serde::Serialize;
 use crate::modules::mode::Mode;
+use serde::Serialize;
 
 #[derive(Debug, Serialize)]
 enum ComponentEvent {

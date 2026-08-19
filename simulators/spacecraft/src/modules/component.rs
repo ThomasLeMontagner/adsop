@@ -3,7 +3,6 @@ use crate::modules::telemetry::ComponentTelemetry;
 
 /// Defines the behavior shared by spacecraft components.
 pub trait Component {
-
     /// Updates the internal state.
     fn update(&mut self, dt_seconds: f32);
 

@@ -1,7 +1,7 @@
 use crate::modules::mode::Mode;
 
-use serde::Serialize;
 use crate::modules::events::Event;
+use serde::Serialize;
 
 /// Represents a value contained in a telemetry data point.
 #[derive(Debug, Serialize)]
