@@ -1,10 +1,10 @@
 use crate::modules::mode::Mode;
-use serde::Serialize;
 use chrono::{DateTime, Utc};
+use serde::Serialize;
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "snake_case")]
-enum ComponentEvent {
+pub enum ComponentEvent {
     LowBatteryVoltage,
     HighTemperature,
 }
@@ -38,4 +38,16 @@ pub struct Event {
     event_type: EventType,
     severity: Severity,
     message: String,
+}
+
+impl Event {
+    pub fn new(source: String, event_type: EventType, severity: Severity, message: String) -> Self {
+        Self {
+            time: Utc::now(),
+            source,
+            event_type,
+            severity,
+            message,
+        }
+    }
 }

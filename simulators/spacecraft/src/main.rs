@@ -65,14 +65,14 @@ async fn start_simulation(
     tokio::spawn(async move {
         let mut spacecraft = Spacecraft::new(
             spacecraft_id.clone(),
-            PowerSystem {
-                name: String::from("Power System"),
-                battery_capacity_wh: 1500.0,
-                battery_energy_wh: 1400.0,
-                consumed_power_w: 350.0,
-                solar_array_generating_power: false,
-                battery_temperature: 15.0,
-            },
+            PowerSystem::new(
+                String::from("Power System"),
+                1500.0,
+                1400.0,
+                350.0,
+                15.0,
+                false,
+            ),
         );
         let mut interval = time::interval(Duration::from_millis(interval_ms));
         loop {
