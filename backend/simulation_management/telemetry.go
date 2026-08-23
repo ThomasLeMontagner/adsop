@@ -1,5 +1,7 @@
 package main
 
+import "time"
+
 type Mode string
 
 const (
@@ -28,4 +30,6 @@ type SpacecraftTelemetry struct {
 	SpacecraftID string               `json:"spacecraft_id"`
 	Mode         Mode                 `json:"mode"`
 	Components   []ComponentTelemetry `json:"components"`
+	Events       []EventFromTelemetry `json:"events"`
+	Timestamp    time.Time            `json:"timestamp"`
 }

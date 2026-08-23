@@ -1,4 +1,5 @@
 use crate::modules::mode::Mode;
+use chrono::{DateTime, Utc};
 
 use crate::modules::events::Event;
 use serde::Serialize;
@@ -40,4 +41,5 @@ pub struct SpacecraftTelemetry {
     pub mode: Mode,
     pub components: Vec<ComponentTelemetry>,
     pub events: Vec<Event>,
+    pub timestamp: DateTime<Utc>,
 }

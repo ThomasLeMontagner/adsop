@@ -39,7 +39,7 @@ pub enum Severity {
 
 #[derive(Debug, Serialize)]
 pub struct Event {
-    time: DateTime<Utc>,
+    timestamp: DateTime<Utc>,
     source: String,
     event_type: EventType,
     severity: Severity,
@@ -49,7 +49,7 @@ pub struct Event {
 impl Event {
     pub fn new(source: String, event_type: EventType, severity: Severity, message: String) -> Self {
         Self {
-            time: Utc::now(),
+            timestamp: Utc::now(),
             source,
             event_type,
             severity,

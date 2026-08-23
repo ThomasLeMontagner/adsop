@@ -4,6 +4,7 @@ use crate::modules::events::{Event, EventType, ModeChangeEvent, Severity};
 use crate::modules::mode::Mode;
 use crate::modules::power_system::PowerSystem;
 use crate::modules::telemetry::SpacecraftTelemetry;
+use chrono::Utc;
 
 /// Represents a spacecraft and its components, operating mode, and pending events.
 pub struct Spacecraft {
@@ -77,16 +78,12 @@ impl Spacecraft {
 
             // Move all events into telemetry and clear the spacecraft queue.
             events: std::mem::take(&mut self.events),
+            timestamp: Utc::now(),
         }
     }
 
     /// Creates an event originating from the spacecraft.
     fn create_event(&self, event_type: EventType, severity: Severity, message: &str) -> Event {
-        Event::new(
-            self.name.clone(),
-            event_type,
-            severity,
-            message.to_string(),
-        )
+        Event::new(self.name.clone(), event_type, severity, message.to_string())
     }
 }
