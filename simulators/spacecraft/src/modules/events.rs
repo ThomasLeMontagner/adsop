@@ -16,6 +16,12 @@ pub struct ModeChangeEvent {
     to: Mode,
 }
 
+impl ModeChangeEvent {
+    pub fn new(from: Mode, to: Mode) -> Self {
+        Self { from, to }
+    }
+}
+
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub enum EventType {

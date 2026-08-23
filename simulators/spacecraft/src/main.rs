@@ -1,7 +1,5 @@
 pub mod modules;
 
-use modules::telemetry::SpacecraftTelemetry;
-
 use crate::modules::spacecraft::Spacecraft;
 use axum::{
     Json, Router,
@@ -80,15 +78,10 @@ async fn start_simulation(
 
             let dt_seconds = interval_ms as f32 / 1000.0;
             spacecraft.power_system.update(dt_seconds);
+
             spacecraft.evaluate_autonomous_rules();
-            let power_system_telemetry = spacecraft.power_system.produce_telemetry();
-            let telemetry = SpacecraftTelemetry {
-                simulation_id: simulation_id.clone(),
-                spacecraft_id: spacecraft_id.clone(),
-                mode: spacecraft.mode(),
-                components: vec![power_system_telemetry],
-                events: vec![],
-            };
+
+            let telemetry = spacecraft.produce_telemetry(&simulation_id);
 
             let result = client
                 .post("http://localhost:8080/internal/telemetry")

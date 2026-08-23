@@ -22,6 +22,7 @@ pub struct PowerSystem {
 }
 
 impl PowerSystem {
+    /// Creates a power system with an initially empty event queue.
     pub fn new(
         name: String,
         battery_capacity_wh: f32,
@@ -41,16 +42,19 @@ impl PowerSystem {
         }
     }
 
+    /// Returns the battery state of charge as a value between 0.0 and 1.0.
     pub fn state_of_charge(&self) -> f32 {
         self.battery_energy_wh / self.battery_capacity_wh
     }
 
+    /// Calculates the battery voltage from its current state of charge.
     fn battery_voltage(&self) -> f32 {
         MIN_BATTERY_VOLTAGE + self.state_of_charge() * (MAX_BATTERY_VOLTAGE - MIN_BATTERY_VOLTAGE)
     }
 
-    fn create_event(&self, event_type: EventType, severity: Severity, message: String) -> Event {
-        Event::new(String::from(&self.name), event_type, severity, message)
+    /// Creates an event originating from the power system.
+    fn create_event(&self, event_type: EventType, severity: Severity, message: &str) -> Event {
+        Event::new(self.name.clone(), event_type, severity, message.to_string())
     }
 }
 
@@ -74,7 +78,7 @@ impl Component for PowerSystem {
             component_name: self.name.clone(),
             data: vec![
                 Data {
-                    name: "state_of_charge".to_string(),
+                    name: "battery_voltage".to_string(),
                     value: DataValue::Float(self.battery_voltage()),
                 },
                 Data {
@@ -92,7 +96,7 @@ impl Component for PowerSystem {
 
         if state_of_charge <= CRITICAL_BATTERY_THRESHOLD {
             anomalies.push(Anomaly::BatteryCritical);
-            let message = String::from("battery critical");
+            let message = "battery critical";
             let event = self.create_event(
                 EventType::Component(ComponentEvent::LowBatteryVoltage),
                 Severity::Warning,
@@ -105,7 +109,7 @@ impl Component for PowerSystem {
 
         if self.battery_temperature >= MAX_BATTERY_TEMPERATURE {
             anomalies.push(Anomaly::BatteryOverheating);
-            let message = String::from("battery overheating");
+            let message = "battery overheating";
             let event = self.create_event(
                 EventType::Component(ComponentEvent::HighTemperature),
                 Severity::Warning,
