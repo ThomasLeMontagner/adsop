@@ -78,7 +78,7 @@ pub struct EventsManager {
     pending_events: Vec<PendingEvent>,
 }
 
-impl c {
+impl EventsManager {
     /// Creates an empty event manager.
     pub fn new() -> Self {
         Self {
