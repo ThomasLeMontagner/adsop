@@ -7,7 +7,7 @@ type Mode string
 const (
 	ModeNominal  Mode = "Nominal"
 	ModeDegraded Mode = "Degraded"
-	ModeSafe     Mode = "Sage"
+	ModeSafe     Mode = "Safe"
 )
 
 type DataValue struct {
