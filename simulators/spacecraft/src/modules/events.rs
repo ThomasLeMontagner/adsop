@@ -63,3 +63,55 @@ impl Event {
         }
     }
 }
+
+/// Tracks the transmission state of an event awaiting delivery confirmation.
+pub struct PendingEvent {
+    event: Event,
+    first_sent_at: Option<DateTime<Utc>>,
+    last_sent_at: Option<DateTime<Utc>>,
+    retry_count: u32,
+    delivery_confirmed: bool,
+}
+
+/// Manages spacecraft events and their transmission state.
+pub struct EventsManager {
+    pending_events: Vec<PendingEvent>,
+}
+
+impl c {
+    /// Creates an empty event manager.
+    pub fn new() -> Self {
+        Self {
+            pending_events: Vec::new(),
+        }
+    }
+
+    pub fn add_event(&mut self, event: Event) {
+        let pending_event = PendingEvent{
+            event,
+            first_sent_at: None,
+            last_sent_at: None,
+            retry_count: 0,
+            delivery_confirmed: false,
+        };
+
+        self.pending_events.push(pending_event);
+    }
+
+    /// Returns the events that still need delivery confirmation.
+    /// todo: prioritize events to sent based on retry_count and last_sent_at
+    pub fn get_events_to_transmit(&self) -> Vec<&Event> {
+        self.pending_events
+            .iter()
+            .filter(|pending_event| !pending_event.delivery_confirmed)
+            .map(|pending_event| &pending_event.event)
+            .collect()
+    }
+
+
+    // update pending event with trasmission date
+    pub fn confirm_transmission(&mut self, event: &Event, timestamp: DateTime<Utc>) {}
+
+    // update confirmed delivery status for an event.
+    pub fn confirm_delivery(&mut self, event: &Event) {}
+}
