@@ -32,8 +32,7 @@ pub struct ComponentTelemetry {
     pub data: Vec<Data>,
 }
 
-/// Represents a complete spacecraft telemetry packet.
-/// TODO: include datetime of the telemetry packet? create a ADR for it
+/// Represents a complete timestamped spacecraft telemetry packet.
 #[derive(Debug, Serialize)]
 pub struct SpacecraftTelemetry {
     pub simulation_id: String,

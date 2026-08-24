@@ -12,6 +12,7 @@ const MAX_BATTERY_TEMPERATURE: f32 = 50.0;
 
 /// Represents the spacecraft power system.
 pub struct PowerSystem {
+    // todo(valid input data, e.g. positive inputs)
     pub name: String,
     pub battery_capacity_wh: f32,
     pub battery_energy_wh: f32,
@@ -59,7 +60,7 @@ impl PowerSystem {
 }
 
 impl Component for PowerSystem {
-    /// Updates the battery energy based of energy consumption and generation.
+    /// Updates battery energy based on power consumption and generation.
     fn update(&mut self, dt_seconds: f32) {
         let generated_power_w = if self.solar_array_generating_power {
             SOLAR_ARRAY_GENERATED_POWER_W
@@ -121,7 +122,7 @@ impl Component for PowerSystem {
         anomalies
     }
 
-    /// Returns the events store and clears them.
+    /// Returns all pending events and clears the event queue.
     fn take_events(&mut self) -> Vec<Event> {
         std::mem::take(&mut self.events)
     }
