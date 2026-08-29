@@ -1,5 +1,4 @@
-use crate::modules::anomalies::Anomaly;
-use crate::modules::events::Event;
+use crate::modules::events::{ComponentEvent};
 use crate::modules::telemetry::ComponentTelemetry;
 
 /// Defines the behavior shared by spacecraft components.
@@ -10,9 +9,6 @@ pub trait Component {
     /// Produces and reports state.
     fn produce_telemetry(&self) -> ComponentTelemetry;
 
-    /// Checks the health and determines whether something is wrong.
-    fn check_health(&mut self) -> Vec<Anomaly>;
-
-    /// Returns the current events and clears them.
-    fn take_events(&mut self) -> Vec<Event>;
+    /// Derives component events based on anomalies and health state.
+    fn evaluate_health(&mut self) -> Vec<ComponentEvent>;
 }

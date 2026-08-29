@@ -1,8 +1,7 @@
-use crate::modules::anomalies::Anomaly;
 use crate::modules::component::Component;
-use crate::modules::events::{Event, EventType, ModeChangeEvent, Severity};
+use crate::modules::events::{EventType, EventsManager, ModeChangeEvent, Severity};
 use crate::modules::mode::Mode;
-use crate::modules::power_system::PowerSystem;
+use crate::modules::power_system::{BatteryHealth, PowerSystem};
 use crate::modules::telemetry::SpacecraftTelemetry;
 use chrono::Utc;
 
@@ -11,7 +10,7 @@ pub struct Spacecraft {
     pub name: String,
     pub power_system: PowerSystem,
     mode: Mode,
-    pub events: Vec<Event>,
+    event_manager: EventsManager,
 }
 
 impl Spacecraft {
@@ -21,7 +20,7 @@ impl Spacecraft {
             name: id,
             power_system,
             mode: Mode::Nominal,
-            events: Vec::new(),
+            event_manager: EventsManager::new(),
         }
     }
 
@@ -30,27 +29,33 @@ impl Spacecraft {
         self.mode
     }
 
+    /// Updates the components of the spacecraft.
+    pub fn update(&mut self, dt_seconds: f32) {
+        self.power_system.update(dt_seconds);
+        self.evaluate_autonomous_rules();
+        self.collect_component_events();
+    }
+
     /// Evaluates component anomalies and updates the spacecraft mode accordingly.
+    /// Requires explicit recovery logic / ground command for recovery.
     pub fn evaluate_autonomous_rules(&mut self) {
-        let anomalies = self.power_system.check_health();
         let current_mode = self.mode;
 
-        if anomalies.contains(&Anomaly::BatteryCritical) {
-            self.mode = Mode::Safe;
-        } else if anomalies.contains(&Anomaly::BatteryLow) {
-            self.mode = Mode::Degraded;
+        match self.power_system.current_battery_health() {
+            BatteryHealth::Critical => self.mode = Mode::Safe,
+            BatteryHealth::Low => self.mode = Mode::Degraded,
+            BatteryHealth::Nominal => {}
         }
 
         if current_mode != self.mode {
             let mode_change_event = ModeChangeEvent::new(current_mode, self.mode);
-
             let message = format!("Mode changed from {:?} to {:?}", current_mode, self.mode);
-            let event = self.create_event(
+            self.event_manager.add_event(
+                self.name.clone(),
                 EventType::ModeChange(mode_change_event),
                 Severity::Warning,
-                &message,
-            );
-            self.events.push(event);
+                message,
+            )
         }
     }
 
@@ -59,31 +64,32 @@ impl Spacecraft {
         self.mode = Mode::Safe;
     }
 
-    /// Moves pending component events into the spacecraft event queue.
+    /// Moves component events into the spacecraft event manager.
     pub fn collect_component_events(&mut self) {
-        self.events.extend(self.power_system.take_events());
+        for component_event in self.power_system.evaluate_health() {
+            let severity = component_event.severity();
+            let message = component_event.message().to_string();
+
+            self.event_manager.add_event(
+                self.power_system.name.clone(),
+                EventType::Component(component_event),
+                severity,
+                message,
+            );
+        }
     }
 
     /// Produces spacecraft telemetry and clears all pending events.
     pub fn produce_telemetry(&mut self, simulation_id: &str) -> SpacecraftTelemetry {
-        let power_system_telemetry = self.power_system.produce_telemetry();
-
-        self.collect_component_events();
-
         SpacecraftTelemetry {
             simulation_id: simulation_id.to_string(),
             spacecraft_id: self.name.clone(),
             mode: self.mode(),
-            components: vec![power_system_telemetry],
+            components: vec![self.power_system.produce_telemetry()],
 
             // Move all events into telemetry and clear the spacecraft queue.
-            events: std::mem::take(&mut self.events),
+            events: self.event_manager.get_events_to_transmit(),
             timestamp: Utc::now(),
         }
-    }
-
-    /// Creates an event originating from the spacecraft.
-    fn create_event(&self, event_type: EventType, severity: Severity, message: &str) -> Event {
-        Event::new(self.name.clone(), event_type, severity, message.to_string())
     }
 }

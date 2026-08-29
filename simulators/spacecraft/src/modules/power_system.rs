@@ -1,6 +1,5 @@
-use crate::modules::anomalies::Anomaly;
 use crate::modules::component::Component;
-use crate::modules::events::{ComponentEvent, Event, EventType, Severity};
+use crate::modules::events::ComponentEvent;
 use crate::modules::telemetry::{ComponentTelemetry, Data, DataValue};
 
 const MIN_BATTERY_VOLTAGE: f32 = 24.0;
@@ -10,16 +9,29 @@ const LOW_BATTERY_THRESHOLD: f32 = 0.40;
 const CRITICAL_BATTERY_THRESHOLD: f32 = 0.20;
 const MAX_BATTERY_TEMPERATURE: f32 = 50.0;
 
+/// Represents the current battery health state.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum BatteryHealth {
+    Nominal,
+    Low,
+    Critical,
+}
+
 /// Represents the spacecraft power system.
 pub struct PowerSystem {
     // todo(valid input data, e.g. positive inputs)
     pub name: String,
+
+    // physical state
     pub battery_capacity_wh: f32,
     pub battery_energy_wh: f32,
     pub consumed_power_w: f32,
     pub battery_temperature: f32,
     pub solar_array_generating_power: bool,
-    events: Vec<Event>,
+
+    // health state
+    battery_overheating: bool,
+    battery_health: BatteryHealth,
 }
 
 impl PowerSystem {
@@ -39,7 +51,8 @@ impl PowerSystem {
             consumed_power_w,
             battery_temperature,
             solar_array_generating_power,
-            events: Vec::new(),
+            battery_overheating: false,
+            battery_health: BatteryHealth::Nominal,
         }
     }
 
@@ -53,9 +66,34 @@ impl PowerSystem {
         MIN_BATTERY_VOLTAGE + self.state_of_charge() * (MAX_BATTERY_VOLTAGE - MIN_BATTERY_VOLTAGE)
     }
 
-    /// Creates an event originating from the power system.
-    fn create_event(&self, event_type: EventType, severity: Severity, message: &str) -> Event {
-        Event::new(self.name.clone(), event_type, severity, message.to_string())
+    /// Checks if the battery level is lower than the critical threshold.
+    fn is_battery_critical(&self) -> bool {
+        self.state_of_charge() <= CRITICAL_BATTERY_THRESHOLD
+    }
+
+    /// Checks if the battery level is lower than the low threshold.
+    fn is_battery_low(&self) -> bool {
+        self.state_of_charge() <= LOW_BATTERY_THRESHOLD
+    }
+
+    /// Checks if the battery level is higher than the high temperature threshold.
+    fn is_battery_temperature_high(&self) -> bool {
+        self.battery_temperature >= MAX_BATTERY_TEMPERATURE
+    }
+
+    /// Derives the current battery health state.
+    fn battery_health(&self) -> BatteryHealth {
+        if self.is_battery_critical() {
+            BatteryHealth::Critical
+        } else if self.is_battery_low() {
+            BatteryHealth::Low
+        } else {
+            BatteryHealth::Nominal
+        }
+    }
+
+    pub fn current_battery_health(&self) -> BatteryHealth {
+        self.battery_health
     }
 }
 
@@ -90,40 +128,48 @@ impl Component for PowerSystem {
         }
     }
 
-    /// Derives the anomaly of the power system based on the state of charge.
-    fn check_health(&mut self) -> Vec<Anomaly> {
-        let mut anomalies = Vec::new();
-        let state_of_charge = self.state_of_charge();
+    /// Derives component events based on anomalies and health state.
+    fn evaluate_health(&mut self) -> Vec<ComponentEvent> {
+        let mut events = Vec::new();
 
-        if state_of_charge <= CRITICAL_BATTERY_THRESHOLD {
-            anomalies.push(Anomaly::BatteryCritical);
-            let message = "battery critical";
-            let event = self.create_event(
-                EventType::Component(ComponentEvent::LowBatteryVoltage),
-                Severity::Warning,
-                message,
-            );
-            self.events.push(event)
-        } else if state_of_charge <= LOW_BATTERY_THRESHOLD {
-            anomalies.push(Anomaly::BatteryLow);
+        let new_battery_health = self.battery_health();
+
+        if new_battery_health != self.battery_health {
+            match (self.battery_health, new_battery_health) {
+                (BatteryHealth::Nominal, BatteryHealth::Low) => {
+                    events.push(ComponentEvent::BatteryLowDetected);
+                }
+
+                (BatteryHealth::Low, BatteryHealth::Critical) => {
+                    events.push(ComponentEvent::BatteryCriticalDetected);
+                }
+
+                (BatteryHealth::Critical, BatteryHealth::Low) => {
+                    events.push(ComponentEvent::BatteryCriticalCleared);
+                }
+
+                (BatteryHealth::Low, BatteryHealth::Nominal) => {
+                    events.push(ComponentEvent::BatteryLowCleared);
+                }
+
+                _ => {}
+            }
+
+            self.battery_health = new_battery_health;
         }
 
-        if self.battery_temperature >= MAX_BATTERY_TEMPERATURE {
-            anomalies.push(Anomaly::BatteryOverheating);
-            let message = "battery overheating";
-            let event = self.create_event(
-                EventType::Component(ComponentEvent::HighTemperature),
-                Severity::Warning,
-                message,
-            );
-            self.events.push(event)
+        let overheating = self.is_battery_temperature_high();
+
+        if overheating && !self.battery_overheating {
+            events.push(ComponentEvent::HighTemperatureDetected);
+            self.battery_overheating = true;
         }
 
-        anomalies
-    }
+        if !overheating && self.battery_overheating {
+            events.push(ComponentEvent::HighTemperatureCleared);
+            self.battery_overheating = false;
+        }
 
-    /// Returns all pending events and clears the event queue.
-    fn take_events(&mut self) -> Vec<Event> {
-        std::mem::take(&mut self.events)
+        events
     }
 }

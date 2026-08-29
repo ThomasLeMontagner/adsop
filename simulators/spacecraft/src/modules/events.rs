@@ -3,15 +3,46 @@ use chrono::{DateTime, Utc};
 use serde::Serialize;
 
 /// Identifies a condition reported by a spacecraft component.
-#[derive(Debug, Serialize, PartialEq)]
+#[derive(Debug, Serialize, PartialEq, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum ComponentEvent {
-    LowBatteryVoltage,
-    HighTemperature,
+    BatteryLowDetected,
+    BatteryLowCleared,
+    BatteryCriticalDetected,
+    BatteryCriticalCleared,
+    HighTemperatureDetected,
+    HighTemperatureCleared,
+}
+
+impl ComponentEvent {
+    /// Returns the severity associated with the component event.
+    pub fn severity(&self) -> Severity {
+        match self {
+            ComponentEvent::BatteryLowDetected => Severity::Warning,
+            ComponentEvent::BatteryCriticalDetected => Severity::Critical,
+            ComponentEvent::HighTemperatureDetected => Severity::Warning,
+
+            ComponentEvent::BatteryLowCleared
+            | ComponentEvent::BatteryCriticalCleared
+            | ComponentEvent::HighTemperatureCleared => Severity::Information,
+        }
+    }
+
+    /// Returns a human-readable message describing the component event.
+    pub fn message(&self) -> &'static str {
+        match self {
+            ComponentEvent::BatteryLowDetected => "Battery level is low",
+            ComponentEvent::BatteryLowCleared => "Battery level returned to nominal",
+            ComponentEvent::BatteryCriticalDetected => "Battery level is critical",
+            ComponentEvent::BatteryCriticalCleared => "Battery is no longer critical",
+            ComponentEvent::HighTemperatureDetected => "Battery temperature is too high",
+            ComponentEvent::HighTemperatureCleared => "Battery temperature returned to normal",
+        }
+    }
 }
 
 /// Records a transition from one spacecraft operating mode to another.
-#[derive(Debug, Serialize, PartialEq)]
+#[derive(Debug, Serialize, PartialEq, Clone)]
 #[serde(rename_all = "snake_case")]
 pub struct ModeChangeEvent {
     from: Mode,
@@ -26,7 +57,7 @@ impl ModeChangeEvent {
 }
 
 /// Describes the domain-specific payload associated with an event.
-#[derive(Debug, Serialize, PartialEq)]
+#[derive(Debug, Serialize, PartialEq, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum EventType {
     Component(ComponentEvent),
@@ -34,17 +65,19 @@ pub enum EventType {
 }
 
 /// Indicates the severity of an event.
-#[derive(Debug, Serialize, PartialEq)]
+#[derive(Debug, Serialize, PartialEq, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum Severity {
     /// An informational event that does not indicate a fault.
     Information,
     /// An event that indicates a condition requiring attention.
     Warning,
+    /// An event that indicates a condition requiring immediate attention.
+    Critical,
 }
 
 /// Represents a timestamped event emitted by the spacecraft or a component.
-#[derive(Debug, Serialize, PartialEq)]
+#[derive(Debug, Serialize, PartialEq, Clone)]
 pub struct Event {
     id: u32,
     timestamp: DateTime<Utc>,
@@ -127,11 +160,11 @@ impl EventsManager {
     /// Returns the events that are eligible for transmission.
     ///
     /// Events remain eligible until their delivery is confirmed.
-    pub fn get_events_to_transmit(&self) -> Vec<&Event> {
+    pub fn get_events_to_transmit(&self) -> Vec<Event> {
         self.pending_events
             .iter()
             .filter(|pending_event| Self::should_be_transmitted(pending_event))
-            .map(|pending_event| &pending_event.event)
+            .map(|pending_event| pending_event.event.clone())
             .collect()
     }
 

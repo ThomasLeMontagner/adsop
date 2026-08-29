@@ -5,7 +5,6 @@ use axum::{
     Json, Router,
     routing::{get, post},
 };
-use modules::component::Component;
 use modules::power_system::PowerSystem;
 use serde::{Deserialize, Serialize};
 use std::{net::SocketAddr, time::Duration};
@@ -77,9 +76,7 @@ async fn start_simulation(
             interval.tick().await;
 
             let dt_seconds = interval_ms as f32 / 1000.0;
-            spacecraft.power_system.update(dt_seconds);
-
-            spacecraft.evaluate_autonomous_rules();
+            spacecraft.update(dt_seconds);
 
             let telemetry = spacecraft.produce_telemetry(&simulation_id);
 
