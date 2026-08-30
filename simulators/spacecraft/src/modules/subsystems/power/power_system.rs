@@ -132,11 +132,19 @@ impl Component for PowerSystem {
                     events.push(ComponentEvent::BatteryLowDetected);
                 }
 
+                (BatteryHealth::Nominal, BatteryHealth::Critical) => {
+                    events.push(ComponentEvent::BatteryCriticalDetected);
+                }
+
                 (BatteryHealth::Low, BatteryHealth::Critical) => {
                     events.push(ComponentEvent::BatteryCriticalDetected);
                 }
 
                 (BatteryHealth::Critical, BatteryHealth::Low) => {
+                    events.push(ComponentEvent::BatteryCriticalCleared);
+                }
+
+                (BatteryHealth::Critical, BatteryHealth::Nominal) => {
                     events.push(ComponentEvent::BatteryCriticalCleared);
                 }
 
@@ -163,5 +171,77 @@ impl Component for PowerSystem {
         }
 
         events
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn power_system_with_energy(battery_energy_wh: f32) -> PowerSystem {
+        PowerSystem::new(
+            "Power System".to_string(),
+            1_000.0,          // battery capacity
+            battery_energy_wh, // battery energy
+            100.0,             // consumed power
+            20.0,              // battery temperature
+            true,              // solar array generating power
+        )
+    }
+
+    #[test]
+    fn battery_health_is_critical_below_critical_threshold() {
+        let power_system = power_system_with_energy(200.0);
+        assert_eq!(power_system.battery_health(), BatteryHealth::Critical);
+    }
+
+    #[test]
+    fn battery_health_is_low_below_low_threshold() {
+        let power_system = power_system_with_energy(400.0);
+        assert_eq!(power_system.battery_health(), BatteryHealth::Low);
+    }
+
+    #[test]
+    fn battery_health_is_nominal_if_above_threshold() {
+        let power_system = power_system_with_energy(401.0);
+        assert_eq!(power_system.battery_health(), BatteryHealth::Nominal);
+    }
+
+    #[test]
+    fn evaluate_health_emits_event_when_battery_becomes_low() {
+        let mut power_system = PowerSystem::new(
+            "Power System".to_string(),
+            1_000.0, // capacity
+            350.0,   // 35% energy: assumed to be Low
+            100.0,
+            20.0,
+            true,
+        );
+
+        assert_eq!(power_system.battery_health, BatteryHealth::Nominal);
+
+        let events = power_system.evaluate_health();
+        assert_eq!(power_system.battery_health, BatteryHealth::Low);
+
+        assert_eq!(events, vec![ComponentEvent::BatteryLowDetected]);
+    }
+
+    #[test]
+    fn evaluate_health_emits_event_when_battery_becomes_critical() {
+        let mut power_system = PowerSystem::new(
+            "Power System".to_string(),
+            1_000.0, // capacity
+            150.0,   // 15% energy: assumed to be Critical
+            100.0,
+            20.0,
+            true,
+        );
+
+        assert_eq!(power_system.battery_health, BatteryHealth::Nominal);
+
+        let events = power_system.evaluate_health();
+        assert_eq!(power_system.battery_health, BatteryHealth::Critical);
+
+        assert_eq!(events, vec![ComponentEvent::BatteryCriticalDetected]);
     }
 }
