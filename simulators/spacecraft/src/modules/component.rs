@@ -1,4 +1,4 @@
-use crate::modules::events::{ComponentEvent};
+use crate::modules::events::ComponentEvent;
 use crate::modules::telemetry::ComponentTelemetry;
 
 /// Defines the behavior shared by spacecraft components.

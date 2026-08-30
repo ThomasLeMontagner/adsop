@@ -32,8 +32,8 @@ impl Spacecraft {
     /// Updates the components of the spacecraft.
     pub fn update(&mut self, dt_seconds: f32) {
         self.power_system.update(dt_seconds);
-        self.evaluate_autonomous_rules();
         self.collect_component_events();
+        self.evaluate_autonomous_rules();
     }
 
     /// Evaluates component anomalies and updates the spacecraft mode accordingly.
@@ -49,12 +49,11 @@ impl Spacecraft {
 
         if current_mode != self.mode {
             let mode_change_event = ModeChangeEvent::new(current_mode, self.mode);
-            let message = format!("Mode changed from {:?} to {:?}", current_mode, self.mode);
             self.event_manager.add_event(
                 self.name.clone(),
                 EventType::ModeChange(mode_change_event),
-                Severity::Warning,
-                message,
+                mode_change_event.severity(),
+                mode_change_event.message(),
             )
         }
     }
@@ -79,17 +78,27 @@ impl Spacecraft {
         }
     }
 
-    /// Produces spacecraft telemetry and clears all pending events.
-    pub fn produce_telemetry(&mut self, simulation_id: &str) -> SpacecraftTelemetry {
+    /// Produces spacecraft telemetry containing all events awaiting delivery confirmation.
+    pub fn produce_telemetry(&self, simulation_id: &str) -> SpacecraftTelemetry {
         SpacecraftTelemetry {
             simulation_id: simulation_id.to_string(),
             spacecraft_id: self.name.clone(),
             mode: self.mode(),
             components: vec![self.power_system.produce_telemetry()],
 
-            // Move all events into telemetry and clear the spacecraft queue.
             events: self.event_manager.get_events_to_transmit(),
             timestamp: Utc::now(),
         }
+    }
+
+    /// Records a transmission attempt for the supplied event identifiers.
+    pub fn record_event_transmissions(&mut self, event_ids: &[u32]) {
+        self.event_manager
+            .record_transmissions(event_ids, Utc::now());
+    }
+
+    /// Removes delivered events from the pending queue.
+    pub fn confirm_event_deliveries(&mut self, event_ids: &[u32]) {
+        self.event_manager.confirm_deliveries(event_ids);
     }
 }

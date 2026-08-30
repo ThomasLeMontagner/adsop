@@ -56,7 +56,7 @@ async fn start_simulation(
 ) -> Json<StartSimulationResponse> {
     let simulation_id = request.simulation_id.clone();
     let spacecraft_id = request.spacecraft_id.clone();
-    let interval_ms = request.telemetry_interval_ms.clone();
+    let interval_ms = request.telemetry_interval_ms;
     let client = reqwest::Client::new();
 
     tokio::spawn(async move {
@@ -79,6 +79,12 @@ async fn start_simulation(
             spacecraft.update(dt_seconds);
 
             let telemetry = spacecraft.produce_telemetry(&simulation_id);
+            let event_ids = telemetry
+                .events
+                .iter()
+                .map(|event| event.id())
+                .collect::<Vec<_>>();
+            spacecraft.record_event_transmissions(&event_ids);
 
             let result = client
                 .post("http://localhost:8080/internal/telemetry")
@@ -88,7 +94,9 @@ async fn start_simulation(
 
             match result {
                 Ok(response) => {
-                    if !response.status().is_success() {
+                    if response.status().is_success() {
+                        spacecraft.confirm_event_deliveries(&event_ids);
+                    } else {
                         eprintln!("Backend rejected telemetry: {}", response.status());
                     }
                 }

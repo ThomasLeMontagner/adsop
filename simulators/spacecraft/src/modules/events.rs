@@ -42,11 +42,29 @@ impl ComponentEvent {
 }
 
 /// Records a transition from one spacecraft operating mode to another.
-#[derive(Debug, Serialize, PartialEq, Clone)]
+#[derive(Debug, Serialize, PartialEq, Copy, Clone)]
 #[serde(rename_all = "snake_case")]
 pub struct ModeChangeEvent {
     from: Mode,
     to: Mode,
+}
+
+impl ModeChangeEvent {
+    /// Returns the severity associated with the change of modes.
+    pub fn severity(&self) -> Severity {
+        match (self.from, self.to) {
+            (Mode::Nominal, Mode::Degraded) => Severity::Warning,
+            (_, Mode::Safe) => Severity::Critical,
+            (Mode::Safe, _) => Severity::Information,
+            (Mode::Degraded, Mode::Nominal) => Severity::Information,
+            _ => Severity::Information,
+        }
+    }
+
+    /// Returns a human-readable message describing the component event.
+    pub fn message(&self) -> String {
+        format!("Mode changed from {:?} to {:?}", self.from, self.to)
+    }
 }
 
 impl ModeChangeEvent {
@@ -105,6 +123,11 @@ impl Event {
             message,
         }
     }
+
+    /// Returns the identifier used to track this event through delivery.
+    pub fn id(&self) -> u32 {
+        self.id
+    }
 }
 
 /// Tracks the transmission state of an event awaiting delivery confirmation.
@@ -113,10 +136,10 @@ pub struct PendingEvent {
     first_sent_at: Option<DateTime<Utc>>,
     last_sent_at: Option<DateTime<Utc>>,
     retry_count: u32,
-    delivery_confirmed: bool,
 }
 
 /// Manages spacecraft events and their transmission state.
+#[derive(Default)]
 pub struct EventsManager {
     pending_events: Vec<PendingEvent>,
     event_count: u32,
@@ -125,10 +148,7 @@ pub struct EventsManager {
 impl EventsManager {
     /// Creates an event manager with no pending events.
     pub fn new() -> Self {
-        Self {
-            pending_events: Vec::new(),
-            event_count: 0,
-        }
+        Self::default()
     }
 
     /// Creates an event with the next identifier and adds it to the pending queue.
@@ -151,7 +171,6 @@ impl EventsManager {
             first_sent_at: None,
             last_sent_at: None,
             retry_count: 0,
-            delivery_confirmed: false,
         };
 
         self.pending_events.push(pending_event);
@@ -161,48 +180,39 @@ impl EventsManager {
     ///
     /// Events remain eligible until their delivery is confirmed.
     pub fn get_events_to_transmit(&self) -> Vec<Event> {
+        // TODO: Prioritize events using `retry_count` and `last_sent_at`.
         self.pending_events
             .iter()
-            .filter(|pending_event| Self::should_be_transmitted(pending_event))
             .map(|pending_event| pending_event.event.clone())
             .collect()
     }
 
-    /// Returns whether a pending event is currently eligible for transmission.
-    fn should_be_transmitted(event: &PendingEvent) -> bool {
-        // TODO: Prioritize events using `retry_count` and `last_sent_at`.
-        !event.delivery_confirmed
-    }
-
-    /// Records a transmission attempt for the event with the supplied identifier.
+    /// Records a transmission attempt for the events with the supplied identifiers.
     ///
     /// The first attempt initializes the first-send timestamp. Later attempts increment the retry
-    /// count. Every attempt updates the most recent send timestamp. An unknown identifier is
-    /// ignored.
-    pub fn confirm_transmission(&mut self, event_id: u32, timestamp: DateTime<Utc>) {
+    /// count. Every attempt updates the most recent send timestamp. Unknown identifiers are ignored.
+    pub fn record_transmissions(&mut self, event_ids: &[u32], timestamp: DateTime<Utc>) {
         self.pending_events
             .iter_mut()
-            .filter(|pending_event| pending_event.event.id == event_id)
-            .for_each(|pending_event| Self::update_transmission(pending_event, &timestamp));
+            .filter(|pending_event| event_ids.contains(&pending_event.event.id))
+            .for_each(|pending_event| Self::update_transmission(pending_event, timestamp));
     }
 
     /// Updates the transmission metadata for a pending event.
-    fn update_transmission(pending_event: &mut PendingEvent, timestamp: &DateTime<Utc>) {
+    fn update_transmission(pending_event: &mut PendingEvent, timestamp: DateTime<Utc>) {
         if pending_event.first_sent_at.is_none() {
-            pending_event.first_sent_at = Some(timestamp.clone());
+            pending_event.first_sent_at = Some(timestamp);
         } else {
             pending_event.retry_count += 1;
         }
-        pending_event.last_sent_at = Some(timestamp.clone());
+        pending_event.last_sent_at = Some(timestamp);
     }
 
-    /// Marks the event with the supplied identifier as delivered.
+    /// Removes delivered events from the pending queue.
     ///
-    /// An unknown identifier is ignored.
-    pub fn confirm_delivery(&mut self, event_id: u32) {
+    /// Unknown identifiers are ignored.
+    pub fn confirm_deliveries(&mut self, event_ids: &[u32]) {
         self.pending_events
-            .iter_mut()
-            .filter(|pending_event| pending_event.event.id == event_id)
-            .for_each(|pending_event| pending_event.delivery_confirmed = true)
+            .retain(|pending_event| !event_ids.contains(&pending_event.event.id));
     }
 }
