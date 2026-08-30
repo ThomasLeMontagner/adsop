@@ -1,4 +1,3 @@
-pub mod anomalies;
 pub mod component;
 pub mod events;
 pub mod mode;
