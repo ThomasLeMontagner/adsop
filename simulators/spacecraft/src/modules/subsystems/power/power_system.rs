@@ -1,5 +1,5 @@
-use crate::modules::component::Component;
-use crate::modules::events::ComponentEvent;
+use crate::modules::subsystems::power::BatteryHealth;
+use crate::modules::subsystems::{Component, ComponentEvent};
 use crate::modules::telemetry::{ComponentTelemetry, Data, DataValue};
 
 const MIN_BATTERY_VOLTAGE: f32 = 24.0;
@@ -8,14 +8,6 @@ const SOLAR_ARRAY_GENERATED_POWER_W: f32 = 600.0;
 const LOW_BATTERY_THRESHOLD: f32 = 0.40;
 const CRITICAL_BATTERY_THRESHOLD: f32 = 0.20;
 const MAX_BATTERY_TEMPERATURE: f32 = 50.0;
-
-/// Represents the current battery health state.
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum BatteryHealth {
-    Nominal,
-    Low,
-    Critical,
-}
 
 /// Represents the spacecraft power system.
 pub struct PowerSystem {

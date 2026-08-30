@@ -1,7 +1,7 @@
-use crate::modules::component::Component;
-use crate::modules::events::{EventType, EventsManager, ModeChangeEvent, Severity};
+use crate::modules::events::{EventType, EventsManager, ModeChangeEvent};
 use crate::modules::mode::Mode;
-use crate::modules::power_system::{BatteryHealth, PowerSystem};
+use crate::modules::subsystems::Component;
+use crate::modules::subsystems::power::{BatteryHealth, PowerSystem};
 use crate::modules::telemetry::SpacecraftTelemetry;
 use chrono::Utc;
 

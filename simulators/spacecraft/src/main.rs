@@ -1,11 +1,11 @@
 pub mod modules;
 
 use crate::modules::spacecraft::Spacecraft;
+use crate::modules::subsystems::power::PowerSystem;
 use axum::{
     Json, Router,
     routing::{get, post},
 };
-use modules::power_system::PowerSystem;
 use serde::{Deserialize, Serialize};
 use std::{net::SocketAddr, time::Duration};
 use tokio::time;
