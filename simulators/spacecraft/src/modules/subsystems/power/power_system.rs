@@ -181,7 +181,7 @@ mod tests {
     fn power_system_with_energy(battery_energy_wh: f32) -> PowerSystem {
         PowerSystem::new(
             "Power System".to_string(),
-            1_000.0,          // battery capacity
+            1_000.0,           // battery capacity
             battery_energy_wh, // battery energy
             100.0,             // consumed power
             20.0,              // battery temperature
@@ -208,16 +208,8 @@ mod tests {
     }
 
     #[test]
-    fn evaluate_health_emits_event_when_battery_becomes_low() {
-        let mut power_system = PowerSystem::new(
-            "Power System".to_string(),
-            1_000.0, // capacity
-            350.0,   // 35% energy: assumed to be Low
-            100.0,
-            20.0,
-            true,
-        );
-
+    fn evaluate_health_emits_event_when_battery_becomes_low_from_nominal() {
+        let mut power_system = power_system_with_energy(400.0);
         assert_eq!(power_system.battery_health, BatteryHealth::Nominal);
 
         let events = power_system.evaluate_health();
@@ -227,21 +219,105 @@ mod tests {
     }
 
     #[test]
-    fn evaluate_health_emits_event_when_battery_becomes_critical() {
-        let mut power_system = PowerSystem::new(
-            "Power System".to_string(),
-            1_000.0, // capacity
-            150.0,   // 15% energy: assumed to be Critical
-            100.0,
-            20.0,
-            true,
-        );
-
+    fn evaluate_health_emits_event_when_battery_becomes_critical_from_nominal() {
+        let mut power_system = power_system_with_energy(200.0);
         assert_eq!(power_system.battery_health, BatteryHealth::Nominal);
 
         let events = power_system.evaluate_health();
         assert_eq!(power_system.battery_health, BatteryHealth::Critical);
 
         assert_eq!(events, vec![ComponentEvent::BatteryCriticalDetected]);
+    }
+
+    #[test]
+    fn evaluate_health_emits_event_when_battery_becomes_critical_from_low() {
+        let mut power_system = power_system_with_energy(400.0);
+
+        power_system.evaluate_health();
+        assert_eq!(power_system.battery_health, BatteryHealth::Low);
+
+        power_system.battery_energy_wh = 200.0;
+        let events = power_system.evaluate_health();
+
+        assert_eq!(power_system.battery_health, BatteryHealth::Critical);
+        assert_eq!(events, vec![ComponentEvent::BatteryCriticalDetected]);
+    }
+
+    #[test]
+    fn evaluate_health_emits_event_when_battery_becomes_low_from_critical() {
+        let mut power_system = power_system_with_energy(200.0);
+
+        power_system.evaluate_health();
+        assert_eq!(power_system.battery_health, BatteryHealth::Critical);
+
+        power_system.battery_energy_wh = 400.0;
+        let events = power_system.evaluate_health();
+
+        assert_eq!(power_system.battery_health, BatteryHealth::Low);
+        assert_eq!(events, vec![ComponentEvent::BatteryCriticalCleared]);
+    }
+
+    #[test]
+    fn evaluate_health_emits_event_when_battery_becomes_nominal_from_low() {
+        let mut power_system = power_system_with_energy(400.0);
+
+        power_system.evaluate_health();
+        assert_eq!(power_system.battery_health, BatteryHealth::Low);
+
+        power_system.battery_energy_wh = 1000.0;
+        let events = power_system.evaluate_health();
+
+        assert_eq!(power_system.battery_health, BatteryHealth::Nominal);
+        assert_eq!(events, vec![ComponentEvent::BatteryLowCleared]);
+    }
+
+    #[test]
+    fn evaluate_health_emits_event_when_battery_becomes_nominal_from_critical() {
+        let mut power_system = power_system_with_energy(200.0);
+
+        power_system.evaluate_health();
+        assert_eq!(power_system.battery_health, BatteryHealth::Critical);
+
+        power_system.battery_energy_wh = 1000.0;
+        let events = power_system.evaluate_health();
+
+        assert_eq!(power_system.battery_health, BatteryHealth::Nominal);
+        assert_eq!(events, vec![ComponentEvent::BatteryCriticalCleared]);
+    }
+
+    #[test]
+    fn evaluate_health_emits_no_event_when_battery_remains_nominal() {
+        let mut power_system = power_system_with_energy(1000.0);
+
+        power_system.evaluate_health();
+        assert_eq!(power_system.battery_health, BatteryHealth::Nominal);
+        let events = power_system.evaluate_health();
+
+        assert_eq!(power_system.battery_health, BatteryHealth::Nominal);
+        assert_eq!(events, vec![]);
+    }
+
+    #[test]
+    fn evaluate_health_emits_no_event_when_battery_remains_low() {
+        let mut power_system = power_system_with_energy(400.0);
+
+        power_system.evaluate_health();
+        assert_eq!(power_system.battery_health, BatteryHealth::Low);
+        let events = power_system.evaluate_health();
+
+        assert_eq!(power_system.battery_health, BatteryHealth::Low);
+        assert_eq!(events, vec![]);
+    }
+
+    #[test]
+    fn evaluate_health_emits_no_event_when_battery_remains_critical() {
+        let mut power_system = power_system_with_energy(200.0);
+
+        power_system.evaluate_health();
+        assert_eq!(power_system.battery_health, BatteryHealth::Critical);
+        let events = power_system.evaluate_health();
+
+        assert_eq!(power_system.battery_health, BatteryHealth::Critical);
+        assert_eq!(events, vec![]);
     }
 }
