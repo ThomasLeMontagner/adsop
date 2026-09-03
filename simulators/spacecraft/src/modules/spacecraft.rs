@@ -1,8 +1,8 @@
-use crate::modules::events::{EventType, EventsManager, ModeChangeEvent};
-use crate::modules::mode::Mode;
-use crate::modules::subsystems::Component;
-use crate::modules::subsystems::power::{BatteryHealth, PowerSystem};
-use crate::modules::telemetry::SpacecraftTelemetry;
+use super::events::{EventType, EventsManager, ModeChangeEvent};
+use super::mode::Mode;
+use super::subsystems::Component;
+use super::subsystems::power::{BatteryHealth, PowerSystem};
+use super::telemetry::SpacecraftTelemetry;
 use chrono::Utc;
 
 /// Represents a spacecraft and its components, operating mode, and pending events.

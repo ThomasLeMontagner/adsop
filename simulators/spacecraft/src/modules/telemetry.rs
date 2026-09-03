@@ -1,7 +1,6 @@
-use crate::modules::mode::Mode;
+use super::events::Event;
+use super::mode::Mode;
 use chrono::{DateTime, Utc};
-
-use crate::modules::events::Event;
 use serde::Serialize;
 
 /// Represents a value contained in a telemetry data point.

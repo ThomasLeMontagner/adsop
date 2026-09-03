@@ -1,4 +1,4 @@
-use crate::modules::subsystems::power::BatteryHealth;
+use super::BatteryHealth;
 use crate::modules::subsystems::{Component, ComponentEvent};
 use crate::modules::telemetry::{ComponentTelemetry, Data, DataValue};
 

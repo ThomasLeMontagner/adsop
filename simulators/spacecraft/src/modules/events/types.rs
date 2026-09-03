@@ -1,4 +1,5 @@
-use crate::modules::subsystems::{ComponentEvent, ModeChangeEvent};
+use super::ModeChangeEvent;
+use crate::modules::subsystems::ComponentEvent;
 use serde::Serialize;
 
 /// Describes the domain-specific payload associated with an event.

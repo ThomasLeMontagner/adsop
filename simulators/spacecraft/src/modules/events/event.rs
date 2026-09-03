@@ -1,5 +1,5 @@
-use crate::modules::events::severity::Severity;
-use crate::modules::events::types::EventType;
+use super::EventType;
+use super::Severity;
 use crate::modules::mode::Mode;
 use chrono::{DateTime, Utc};
 use serde::Serialize;

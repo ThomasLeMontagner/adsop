@@ -1,8 +1,9 @@
-use crate::modules::events::Severity;
-use crate::modules::events::types::EventType;
-use crate::modules::events::{Event, PendingEvent};
+use super::EventType;
+use super::Severity;
+use super::{Event, PendingEvent};
 use chrono::{DateTime, Utc};
 
+// TODO: review import path (complete vs from the package)
 /// Manages spacecraft events and their transmission state.
 #[derive(Default)]
 pub struct EventsManager {
