@@ -51,6 +51,15 @@ async fn health() -> Json<HealthResponse> {
     Json(HealthResponse { status: "ok" })
 }
 
+/// Starts a spacecraft simulation and periodically publishes telemetry.
+///
+/// A dedicated Tokio task owns the spacecraft state for the lifetime of the simulation. On every
+/// simulation tick, the spacecraft state is updated, telemetry is produced, and pending events are
+/// included in the telemetry packet.
+///
+/// Events included in a telemetry packet are recorded as transmission attempts.They remain pending
+/// until the backend successfully accepts the telemetry, after which their delivery is confirmed,
+/// and they are removed from the spacecraft event queue.
 async fn start_simulation(
     Json(request): Json<StartSimulationRequest>,
 ) -> Json<StartSimulationResponse> {
@@ -78,7 +87,10 @@ async fn start_simulation(
             let dt_seconds = interval_ms as f32 / 1000.0;
             spacecraft.update(dt_seconds);
 
+            // Build telemetry including events currently awaiting delivery confirmation.
             let telemetry = spacecraft.produce_telemetry(&simulation_id);
+
+            // Keep track of the events included in this specific transmission attempt.
             let event_ids = telemetry
                 .events
                 .iter()
@@ -95,6 +107,8 @@ async fn start_simulation(
             match result {
                 Ok(response) => {
                     if response.status().is_success() {
+                        // Successful ingestion currently acts as delivery confirmation.
+                        // todo!(explicit event acknowledgements from ground)
                         spacecraft.confirm_event_deliveries(&event_ids);
                     } else {
                         eprintln!("Backend rejected telemetry: {}", response.status());
