@@ -79,6 +79,8 @@ func handleTelemetryIngest(telemetryStore *TelemetryStore, webSocketHub *WebSock
 		webSocketHub.Broadcast(telemetry)
 		writeJSON(writer, http.StatusAccepted, map[string]string{"status": "accepted"})
 	}
+
+	// todo: store the events until user acknowledgement
 }
 
 func handleGetTelemetry(telemetryStore *TelemetryStore) http.HandlerFunc {
