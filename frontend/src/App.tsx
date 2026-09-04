@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { SpacecraftTelemetry } from "./telemetry/types";
+import type { SpacecraftTelemetry, GroundState } from "./telemetry/types";
 import "./App.css";
 
 type Simulation = {
@@ -42,6 +42,7 @@ function App() {
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [telemetry, setTelemetry] = useState<SpacecraftTelemetry | null>(null);
+  const [groundState, setGroundState] = useState<GroundState | null>(null);
   const [connectionStatus, setConnectionStatus] =
     useState<ConnectionStatus>("connecting");
 
@@ -55,7 +56,9 @@ function App() {
 
     socket.onmessage = (event) => {
       try {
-        const latestTelemetry: SpacecraftTelemetry = JSON.parse(event.data);
+        const latestGroundState: GroundState = JSON.parse(event.data)
+        setGroundState(latestGroundState)
+        const latestTelemetry: SpacecraftTelemetry = latestGroundState.spacecraft_telemetry;
         setTelemetry(latestTelemetry);
       } catch {
         console.error("Received an invalid telemetry packet");
@@ -102,10 +105,10 @@ function App() {
   const spacecraftId = telemetry?.spacecraft_id ?? "mars-orbiter-1";
   const latestPacket = telemetry?.timestamp
     ? new Date(telemetry.timestamp).toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-      })
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    })
     : "Waiting";
 
   return (
@@ -275,32 +278,32 @@ function App() {
                   <h2 id="events-title">Event log</h2>
                 </div>
                 <span className="event-count">
-                  {telemetry?.events.length ?? 0}
+                  {groundState?.managed_events.length ?? 0}
                 </span>
               </div>
 
-              {telemetry?.events.length ? (
+              {groundState?.managed_events.length ? (
                 <div className="event-list">
-                  {telemetry.events.map((event) => (
-                    <article className="event" key={event.id}>
+                  {groundState.managed_events.map((managed_event) => (
+                    <article className="event" key={managed_event.event.id}>
                       <span
-                        className={`event__marker event__marker--${event.severity}`}
+                        className={`event__marker event__marker--${managed_event.event.severity}`}
                         aria-hidden="true"
                       />
                       <div>
                         <div className="event__meta">
-                          <span className={`severity severity--${event.severity}`}>
-                            {event.severity}
+                          <span className={`severity severity--${managed_event.event.severity}`}>
+                            {managed_event.event.severity}
                           </span>
-                          <time dateTime={event.timestamp}>
-                            {new Date(event.timestamp).toLocaleTimeString([], {
+                          <time dateTime={managed_event.event.timestamp}>
+                            {new Date(managed_event.event.timestamp).toLocaleTimeString([], {
                               hour: "2-digit",
                               minute: "2-digit",
                             })}
                           </time>
                         </div>
-                        <p>{event.message}</p>
-                        <small>{labelize(event.source)}</small>
+                        <p>{managed_event.event.message}</p>
+                        <small>{labelize(managed_event.event.source)}</small>
                       </div>
                     </article>
                   ))}
@@ -336,9 +339,9 @@ function App() {
                   <dd>
                     {simulation
                       ? new Date(simulation.created_at).toLocaleString([], {
-                          dateStyle: "medium",
-                          timeStyle: "short",
-                        })
+                        dateStyle: "medium",
+                        timeStyle: "short",
+                      })
                       : "—"}
                   </dd>
                 </div>

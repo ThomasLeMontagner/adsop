@@ -9,6 +9,7 @@ import (
 func main() {
 	simulationStore := NewSimulationStore()
 	telemetryStore := NewTelemetryStore()
+	eventsStore := NewEventStore()
 	webSocketHub := NewWebSocketHub()
 
 	serverMux := http.NewServeMux()
@@ -36,7 +37,7 @@ func main() {
 
 	serverMux.HandleFunc(
 		"POST /internal/telemetry",
-		handleTelemetryIngest(telemetryStore, webSocketHub),
+		handleTelemetryIngest(telemetryStore, eventsStore, webSocketHub),
 	)
 
 	serverMux.HandleFunc(

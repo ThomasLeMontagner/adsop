@@ -20,14 +20,14 @@ type ComponentEventType = string;
 
 type EventType =
   | {
-      component: ComponentEventType;
-    }
+    component: ComponentEventType;
+  }
   | {
-      mode_change: {
-        from: Mode;
-        to: Mode;
-      };
+    mode_change: {
+      from: Mode;
+      to: Mode;
     };
+  };
 
 type Severity = "information" | "warning" | "critical";
 
@@ -40,6 +40,12 @@ type Event = {
   message: string;
 };
 
+export type ManagedEvent = {
+  event: Event;
+  acknowledged: boolean;
+}
+
+
 export type SpacecraftTelemetry = {
   simulation_id: string;
   spacecraft_id: string;
@@ -48,3 +54,8 @@ export type SpacecraftTelemetry = {
   events: Event[];
   timestamp: string;
 };
+
+export type GroundState = {
+  spacecraft_telemetry: SpacecraftTelemetry;
+  managed_events: ManagedEvent[];
+}

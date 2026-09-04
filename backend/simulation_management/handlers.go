@@ -61,7 +61,7 @@ func handleGetSimulation(simulationStore *SimulationStore) http.HandlerFunc {
 	}
 }
 
-func handleTelemetryIngest(telemetryStore *TelemetryStore, webSocketHub *WebSocketHub) http.HandlerFunc {
+func handleTelemetryIngest(telemetryStore *TelemetryStore, eventStore *EventStore, webSocketHub *WebSocketHub) http.HandlerFunc {
 	return func(
 		writer http.ResponseWriter,
 		request *http.Request,
@@ -76,7 +76,12 @@ func handleTelemetryIngest(telemetryStore *TelemetryStore, webSocketHub *WebSock
 		}
 
 		telemetryStore.Update(telemetry)
-		webSocketHub.Broadcast(telemetry)
+		eventStore.Update(telemetry.Events)
+		groundState := GroundState{
+			SpacecraftTelemetry: telemetry,
+			ManagedEvents:       eventStore.GetEvents(),
+		}
+		webSocketHub.Broadcast(groundState)
 		writeJSON(writer, http.StatusAccepted, map[string]string{"status": "accepted"})
 	}
 
