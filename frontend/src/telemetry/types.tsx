@@ -40,12 +40,14 @@ type Event = {
   message: string;
 };
 
+/** An event enriched with ground-side acknowledgement state. */
 export type ManagedEvent = {
   event: Event;
   acknowledged: boolean;
 }
 
 
+/** A timestamped spacecraft state received from the backend. */
 export type SpacecraftTelemetry = {
   simulation_id: string;
   spacecraft_id: string;
@@ -54,6 +56,7 @@ export type SpacecraftTelemetry = {
   timestamp: string;
 };
 
+/** The telemetry and managed-event snapshot delivered over WebSocket. */
 export type GroundState = {
   spacecraft_telemetry: SpacecraftTelemetry;
   managed_events: ManagedEvent[];
