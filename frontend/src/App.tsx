@@ -1,4 +1,4 @@
-import { Component, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 type Simulation = {
   id: string;
@@ -23,11 +23,36 @@ type ComponentTelemetry = {
   data: Data[];
 }
 
+type ComponentEventType = string;
+
+type EventType =
+  | {
+      component: ComponentEventType;
+    }
+  | {
+      mode_change: {
+        from: Mode;
+        to: Mode;
+      };
+    };
+
+type Severity = "information" | "warning" | "critical";
+
+type Event = {
+  id: number;
+  timestamp: string;
+  source: string;
+  event_type: EventType;
+  severity: Severity;
+  message: string;
+};
+
 type SpacecraftTelemetry = {
   simulation_id: string;
   spacecraft_id: string;
   mode: Mode;
   components: ComponentTelemetry[];
+  events: Event[];
 };
 
 
@@ -130,12 +155,20 @@ function App() {
           {telemetry.components.map((component) => (
             <div key={component.component_name}>
               <h3>{component.component_name}</h3>
-
               {component.data.map((data) => (
                 <p key={data.name}>
                   <strong>{data.name}:</strong> {String(data.value.value)}
                 </p>
               ))}
+            </div>
+          ))}
+          {telemetry.events.map((event) => (
+            <div key={event.id}>
+              <strong>{event.severity}</strong>
+              <span>{event.message}</span>
+                <small>
+                  {event.source} - {new Date(event.timestamp).toLocaleString()}
+                </small>
             </div>
           ))}
         </section>
