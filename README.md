@@ -4,6 +4,12 @@
 
 ADSOP (Autonomous Deep Space Operations Platform) is an open-source platform for designing, simulating, and operating autonomous space missions. It provides a common operational environment where spacecraft behaviour, mission operations, and onboard autonomy can be developed, validated, and explored before deployment to real missions.
 
+## Mission Control Dashboard
+
+The dashboard presents live spacecraft telemetry, operating mode, simulation details, and mission events in a single operational view.
+
+![ADSOP mission control dashboard showing a realistic simulation with live telemetry and warning and critical events](./docs/images/adsop-mission-control.png)
+
 ## Vision
 
 Enable anyone, from students and researchers to mission engineers,to prototype, simulate and operate realistic space missions using modern software engineering practices.
