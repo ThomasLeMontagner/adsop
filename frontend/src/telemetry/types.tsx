@@ -51,7 +51,6 @@ export type SpacecraftTelemetry = {
   spacecraft_id: string;
   mode: Mode;
   components: ComponentTelemetry[];
-  events: Event[];
   timestamp: string;
 };
 
