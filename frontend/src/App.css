@@ -555,13 +555,67 @@
 
 .event {
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: auto minmax(0, 1fr);
   gap: 12px;
   padding: 16px 20px;
 }
 
 .event + .event {
   border-top: 1px solid var(--border-soft);
+}
+
+.event__content {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.event__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  margin-top: 12px;
+}
+
+.event__footer small {
+  flex: 1 1 80px;
+  color: var(--text-muted);
+}
+
+.acknowledge-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  min-height: 36px;
+  margin-left: auto;
+  padding: 7px 12px;
+  border: 1px solid rgba(89, 220, 192, 0.28);
+  border-radius: 7px;
+  color: var(--accent);
+  background: rgba(89, 220, 192, 0.06);
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1.3;
+  cursor: pointer;
+  transition: background 160ms ease, border-color 160ms ease;
+}
+
+.acknowledge-button:hover {
+  border-color: var(--accent);
+  background: rgba(89, 220, 192, 0.14);
+}
+
+.acknowledge-button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+@media (pointer: coarse) {
+  .acknowledge-button {
+    min-height: 44px;
+  }
 }
 
 .event__marker {

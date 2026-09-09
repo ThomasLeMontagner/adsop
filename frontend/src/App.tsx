@@ -37,6 +37,18 @@ function formatTelemetryValue(name: string, value: unknown) {
   return String(value);
 }
 
+function AcknowledgeButton({ eventId }: { eventId: number }) {
+  const handleClick = () => {
+    console.log(eventId);
+  };
+
+  return (
+    <button className="acknowledge-button" type="button" onClick={handleClick}>
+      Acknowledge
+    </button>
+  );
+}
+
 function App() {
   const [simulation, setSimulation] = useState<Simulation | null>(null);
   const [isCreating, setIsCreating] = useState(false);
@@ -290,7 +302,7 @@ function App() {
                         className={`event__marker event__marker--${managed_event.event.severity}`}
                         aria-hidden="true"
                       />
-                      <div>
+                      <div className="event__content">
                         <div className="event__meta">
                           <span className={`severity severity--${managed_event.event.severity}`}>
                             {managed_event.event.severity}
@@ -303,7 +315,10 @@ function App() {
                           </time>
                         </div>
                         <p>{managed_event.event.message}</p>
-                        <small>{labelize(managed_event.event.source)}</small>
+                        <div className="event__footer">
+                          <small>{labelize(managed_event.event.source)}</small>
+                          <AcknowledgeButton eventId={managed_event.event.id} />
+                        </div>
                       </div>
                     </article>
                   ))}
