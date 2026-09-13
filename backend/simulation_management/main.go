@@ -44,9 +44,15 @@ func main() {
 		"GET /simulations/{id}/telemetry",
 		handleGetTelemetry(telemetryStore),
 	)
+
 	serverMux.HandleFunc(
 		"GET /ws",
 		handleGetWebSocket(webSocketHub),
+	)
+
+	serverMux.HandleFunc(
+		"POST /events/{eventId}/acknowledge",
+		acknowledgeEventHandler(eventsStore),
 	)
 
 	server := &http.Server{

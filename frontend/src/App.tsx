@@ -38,8 +38,23 @@ function formatTelemetryValue(name: string, value: unknown) {
 }
 
 function AcknowledgeButton({ eventId }: { eventId: number }) {
-  const handleClick = () => {
-    console.log(eventId);
+  const handleClick = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:8080/events/${eventId}/acknowledge`,
+        {
+          method: "POST",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Request failed: ${response.status}`);
+      }
+
+      console.log(` Event ${eventId} acknowledged`);
+    } catch (error) {
+      console.log("Could not acknowledge event:", error);
+    }
   };
 
   return (
@@ -82,6 +97,11 @@ function App() {
 
     return () => socket.close();
   }, []);
+
+  const activeEvents =
+    groundState?.managed_events.filter(
+      (managedEvent) => !managedEvent.acknowledged
+    ) ?? [];
 
   async function createSimulation() {
     setIsCreating(true);
@@ -293,10 +313,10 @@ function App() {
                   {groundState?.managed_events.length ?? 0}
                 </span>
               </div>
-
-              {groundState?.managed_events.length ? (
+  
+              {activeEvents.length ? (
                 <div className="event-list">
-                  {groundState.managed_events.map((managed_event) => (
+                  {activeEvents.map((managed_event) => (
                     <article className="event" key={managed_event.event.id}>
                       <span
                         className={`event__marker event__marker--${managed_event.event.severity}`}
