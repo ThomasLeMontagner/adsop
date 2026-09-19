@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { SpacecraftTelemetry, GroundState } from "./telemetry/types";
 import "./App.css";
+import { acknowledgeEvent } from "./api/events";
 
 type Simulation = {
   id: string;
@@ -37,21 +38,11 @@ function formatTelemetryValue(name: string, value: unknown) {
   return String(value);
 }
 
-function AcknowledgeButton({ eventId }: { eventId: number }) {
+function AcknowledgeButton({ eventId: eventID }: { eventId: number }) {
   const handleClick = async () => {
     try {
-      const response = await fetch(
-        `http://localhost:8080/events/${eventId}/acknowledge`,
-        {
-          method: "POST",
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`Request failed: ${response.status}`);
-      }
-
-      console.log(` Event ${eventId} acknowledged`);
+      await acknowledgeEvent(eventID)
+      console.log(` Event ${eventID} acknowledged`);
     } catch (error) {
       console.log("Could not acknowledge event:", error);
     }
