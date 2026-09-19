@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"sync"
 	"time"
 )
@@ -69,4 +70,21 @@ func (eventStore *EventStore) Update(events []EventFromTelemetry) {
 	for _, event := range events {
 		eventStore.AddEvent(event)
 	}
+}
+
+
+var ErrEventNotFound = errors.New("event not found")
+
+func (store *EventStore) AcknowledgeEvent(eventID uint32) error {
+	store.mu.Lock()
+	defer store.mu.Unlock()
+
+	for index := range store.events {
+		if store.events[index].Event.ID == eventID {
+			store.events[index].Acknowledged = true
+			return nil
+		}
+	}
+
+	return ErrEventNotFound
 }

@@ -2,7 +2,9 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/coder/websocket"
 )
@@ -136,5 +138,32 @@ func handleGetWebSocket(webSocketHub *WebSocketHub) http.HandlerFunc {
 				break
 			}
 		}
+	}
+}
+
+func acknowledgeEventHandler(eventStore *EventStore) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		eventIDText := r.PathValue("eventId")
+
+		eventID64, err := strconv.ParseUint(eventIDText, 10, 32)
+		if err != nil {
+			http.Error(w, "Invalid event ID", http.StatusBadRequest)
+			return
+		}
+
+		eventID := uint32(eventID64)
+
+		err = eventStore.AcknowledgeEvent(eventID)
+		if err != nil {
+			if errors.Is(err, ErrEventNotFound) {
+				http.Error(w, "Event not found", http.StatusNotFound)
+				return
+			}
+
+			http.Error(w, "Could not acknowledge event", http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusNoContent)
 	}
 }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { SpacecraftTelemetry, GroundState } from "./telemetry/types";
 import "./App.css";
+import { acknowledgeEvent } from "./api/events";
 
 type Simulation = {
   id: string;
@@ -37,6 +38,23 @@ function formatTelemetryValue(name: string, value: unknown) {
   return String(value);
 }
 
+function AcknowledgeButton({ eventId: eventID }: { eventId: number }) {
+  const handleClick = async () => {
+    try {
+      await acknowledgeEvent(eventID)
+      console.log(` Event ${eventID} acknowledged`);
+    } catch (error) {
+      console.log("Could not acknowledge event:", error);
+    }
+  };
+
+  return (
+    <button className="acknowledge-button" type="button" onClick={handleClick}>
+      Acknowledge
+    </button>
+  );
+}
+
 function App() {
   const [simulation, setSimulation] = useState<Simulation | null>(null);
   const [isCreating, setIsCreating] = useState(false);
@@ -70,6 +88,11 @@ function App() {
 
     return () => socket.close();
   }, []);
+
+  const activeEvents =
+    groundState?.managed_events.filter(
+      (managedEvent) => !managedEvent.acknowledged
+    ) ?? [];
 
   async function createSimulation() {
     setIsCreating(true);
@@ -281,16 +304,16 @@ function App() {
                   {groundState?.managed_events.length ?? 0}
                 </span>
               </div>
-
-              {groundState?.managed_events.length ? (
+  
+              {activeEvents.length ? (
                 <div className="event-list">
-                  {groundState.managed_events.map((managed_event) => (
+                  {activeEvents.map((managed_event) => (
                     <article className="event" key={managed_event.event.id}>
                       <span
                         className={`event__marker event__marker--${managed_event.event.severity}`}
                         aria-hidden="true"
                       />
-                      <div>
+                      <div className="event__content">
                         <div className="event__meta">
                           <span className={`severity severity--${managed_event.event.severity}`}>
                             {managed_event.event.severity}
@@ -303,7 +326,10 @@ function App() {
                           </time>
                         </div>
                         <p>{managed_event.event.message}</p>
-                        <small>{labelize(managed_event.event.source)}</small>
+                        <div className="event__footer">
+                          <small>{labelize(managed_event.event.source)}</small>
+                          <AcknowledgeButton eventId={managed_event.event.id} />
+                        </div>
                       </div>
                     </article>
                   ))}
