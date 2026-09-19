@@ -1,5 +1,9 @@
 export async function acknowledgeEvent(eventID: number): Promise<void> {
-    const response = await fetch(`api/events/${eventID}/acknowledge`, {
+    if (!Number.isSafeInteger(eventID) || eventID < 0) {
+        throw new Error("Invalid event ID");
+    }
+    const eventIdSegment = encodeURIComponent(String(eventID));
+    const response = await fetch(`api/events/${eventIdSegment}/acknowledge`, {
         method: "POST",
     });
 
