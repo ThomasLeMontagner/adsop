@@ -1,8 +1,8 @@
-package main
+package api
 
 import "net/http"
 
-func corsMiddleware(next http.Handler) http.Handler {
+func CorsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(
 		writer http.ResponseWriter,
 		request *http.Request,

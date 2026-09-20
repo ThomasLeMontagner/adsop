@@ -1,43 +1,27 @@
-package main
+package store
 
 import (
-	"encoding/json"
 	"errors"
 	"sync"
-	"time"
+
+	"github.com/ThomasLeMontagner/adsop/backend/internal/domain"
 )
-
-// EventFromTelemetry is an event received in a spacecraft telemetry packet.
-type EventFromTelemetry struct {
-	ID        uint32          `json:"id"`
-	Timestamp time.Time       `json:"timestamp"`
-	Source    string          `json:"source"`
-	EventType json.RawMessage `json:"event_type"`
-	Severity  string          `json:"severity"`
-	Message   string          `json:"message"`
-}
-
-// ManagedEvent adds ground-side acknowledgement state to a spacecraft event.
-type ManagedEvent struct {
-	Event        EventFromTelemetry `json:"event"`
-	Acknowledged bool               `json:"acknowledged"`
-}
 
 // EventStore retains unique events received by the ground segment.
 type EventStore struct {
 	mu     sync.RWMutex
-	events []ManagedEvent
+	events []domain.ManagedEvent
 }
 
 // NewEventStore creates an empty in-memory event store.
 func NewEventStore() *EventStore {
 	return &EventStore{
-		events: make([]ManagedEvent, 0),
+		events: make([]domain.ManagedEvent, 0),
 	}
 }
 
 // AddEvent stores an event unless its identifier is already present.
-func (eventStore *EventStore) AddEvent(event EventFromTelemetry) {
+func (eventStore *EventStore) AddEvent(event domain.EventFromTelemetry) {
 	eventStore.mu.Lock()
 	defer eventStore.mu.Unlock()
 
@@ -47,7 +31,7 @@ func (eventStore *EventStore) AddEvent(event EventFromTelemetry) {
 		}
 	}
 
-	var newEvent = ManagedEvent{
+	var newEvent = domain.ManagedEvent{
 		Event:        event,
 		Acknowledged: false,
 	}
@@ -55,26 +39,27 @@ func (eventStore *EventStore) AddEvent(event EventFromTelemetry) {
 }
 
 // GetEvents returns a copy of all managed events in ingestion order.
-func (eventStore *EventStore) GetEvents() []ManagedEvent {
+func (eventStore *EventStore) GetEvents() []domain.ManagedEvent {
 	eventStore.mu.RLock()
 	defer eventStore.mu.RUnlock()
 
-	events := make([]ManagedEvent, len(eventStore.events))
+	events := make([]domain.ManagedEvent, len(eventStore.events))
 	copy(events, eventStore.events)
 
 	return events
 }
 
 // Update adds each event from a telemetry packet to the store.
-func (eventStore *EventStore) Update(events []EventFromTelemetry) {
+func (eventStore *EventStore) Update(events []domain.EventFromTelemetry) {
 	for _, event := range events {
 		eventStore.AddEvent(event)
 	}
 }
 
-
+// ErrEventNotFound indicates that an event does not exist in the store.
 var ErrEventNotFound = errors.New("event not found")
 
+// AcknowledgeEvent marks an event as acknowledged.
 func (store *EventStore) AcknowledgeEvent(eventID uint32) error {
 	store.mu.Lock()
 	defer store.mu.Unlock()

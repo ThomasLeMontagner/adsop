@@ -1,17 +1,19 @@
-package main
+package simulator
 
 import (
 	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
+
+	"github.com/ThomasLeMontagner/adsop/backend/internal/domain"
 )
 
-func startSimulator(
+func StartSimulator(
 	simulationID string,
 	spacecraftID string,
 ) error {
-	requestBody := StartSimulationRequest{
+	requestBody := domain.StartSimulationRequest{
 		SimulationID:        simulationID,
 		SpacecraftID:        spacecraftID,
 		TelemetryIntervalMS: 1000,

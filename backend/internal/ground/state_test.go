@@ -1,13 +1,15 @@
-package main
+package ground
 
 import (
 	"encoding/json"
 	"testing"
+
+	"github.com/ThomasLeMontagner/adsop/backend/internal/store"
 )
 
 func TestGroundStateSerializesEmptyManagedEventsAsArray(t *testing.T) {
 	groundState := GroundState{
-		ManagedEvents: NewEventStore().GetEvents(),
+		ManagedEvents: store.NewEventStore().GetEvents(),
 	}
 
 	data, err := json.Marshal(groundState)

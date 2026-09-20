@@ -1,4 +1,4 @@
-package main
+package realtime
 
 import (
 	"context"
@@ -8,17 +8,20 @@ import (
 	"github.com/coder/websocket"
 )
 
+// WebSocketHub manages active WebSocket clients and broadcasts messages to them.
 type WebSocketHub struct {
 	mu      sync.RWMutex
 	clients map[*websocket.Conn]struct{}
 }
 
+// NewWebSocketHub creates an empty WebSocket hub.
 func NewWebSocketHub() *WebSocketHub {
 	return &WebSocketHub{
 		clients: make(map[*websocket.Conn]struct{}),
 	}
 }
 
+// Add registers a WebSocket connection with the hub.
 func (hub *WebSocketHub) Add(connection *websocket.Conn) {
 	hub.mu.Lock()
 	defer hub.mu.Unlock()
@@ -26,6 +29,7 @@ func (hub *WebSocketHub) Add(connection *websocket.Conn) {
 	hub.clients[connection] = struct{}{}
 }
 
+// Remove unregisters a WebSocket connection from the hub.
 func (hub *WebSocketHub) Remove(connection *websocket.Conn) {
 	hub.mu.Lock()
 	defer hub.mu.Unlock()
@@ -33,6 +37,7 @@ func (hub *WebSocketHub) Remove(connection *websocket.Conn) {
 	delete(hub.clients, connection)
 }
 
+// Broadcast sends a JSON-encoded value to all connected clients.
 func (hub *WebSocketHub) Broadcast(value any) {
 	data, err := json.Marshal(value)
 	if err != nil {

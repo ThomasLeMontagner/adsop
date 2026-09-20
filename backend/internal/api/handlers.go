@@ -1,4 +1,4 @@
-package main
+package api
 
 import (
 	"encoding/json"
@@ -7,14 +7,32 @@ import (
 	"strconv"
 
 	"github.com/coder/websocket"
+
+	"github.com/ThomasLeMontagner/adsop/backend/internal/domain"
+	"github.com/ThomasLeMontagner/adsop/backend/internal/ground"
+	"github.com/ThomasLeMontagner/adsop/backend/internal/realtime"
+	"github.com/ThomasLeMontagner/adsop/backend/internal/simulator"
+	"github.com/ThomasLeMontagner/adsop/backend/internal/store"
 )
 
-func handleCreateSimulation(simulationStore *SimulationStore) http.HandlerFunc {
+// CheckHealth returns a handler that reports the API's health status.
+func CheckHealth() http.HandlerFunc {
+	return func(writer http.ResponseWriter, request *http.Request) {
+		writeJSON(
+			writer,
+			http.StatusOK,
+			map[string]string{"status": "ok"},
+		)
+	}
+}
+
+// HandleCreateSimulation returns a handler that creates and starts a simulation.
+func HandleCreateSimulation(simulationStore *store.SimulationStore) http.HandlerFunc {
 	return func(
 		writer http.ResponseWriter,
 		request *http.Request,
 	) {
-		var simulationRequest CreateSimulationRequest
+		var simulationRequest domain.CreateSimulationRequest
 
 		if err := json.NewDecoder(request.Body).Decode(
 			&simulationRequest,
@@ -30,7 +48,7 @@ func handleCreateSimulation(simulationStore *SimulationStore) http.HandlerFunc {
 
 		simulation := simulationStore.Create()
 
-		if err := startSimulator(
+		if err := simulator.StartSimulator(
 			simulation.ID,
 			simulationRequest.SpacecraftID,
 		); err != nil {
@@ -45,7 +63,8 @@ func handleCreateSimulation(simulationStore *SimulationStore) http.HandlerFunc {
 	}
 }
 
-func handleGetSimulation(simulationStore *SimulationStore) http.HandlerFunc {
+// HandleGetSimulation returns a handler that retrieves a simulation by ID.
+func HandleGetSimulation(simulationStore *store.SimulationStore) http.HandlerFunc {
 	return func(
 		writer http.ResponseWriter,
 		request *http.Request,
@@ -63,12 +82,13 @@ func handleGetSimulation(simulationStore *SimulationStore) http.HandlerFunc {
 	}
 }
 
-func handleTelemetryIngest(telemetryStore *TelemetryStore, eventStore *EventStore, webSocketHub *WebSocketHub) http.HandlerFunc {
+// HandleTelemetryIngest returns a handler that stores and broadcasts telemetry.
+func (server *Server) HandleTelemetryIngest() http.HandlerFunc {
 	return func(
 		writer http.ResponseWriter,
 		request *http.Request,
 	) {
-		var telemetry SpacecraftTelemetry
+		var telemetry domain.SpacecraftTelemetry
 
 		if err := json.NewDecoder(request.Body).Decode(
 			&telemetry,
@@ -77,20 +97,19 @@ func handleTelemetryIngest(telemetryStore *TelemetryStore, eventStore *EventStor
 			return
 		}
 
-		telemetryStore.Update(telemetry)
-		eventStore.Update(telemetry.Events)
-		groundState := GroundState{
+		server.telemetryStore.Update(telemetry)
+		server.eventStore.Update(telemetry.Events)
+		groundState := ground.GroundState{
 			SpacecraftTelemetry: telemetry,
-			ManagedEvents:       eventStore.GetEvents(),
+			ManagedEvents:       server.eventStore.GetEvents(),
 		}
-		webSocketHub.Broadcast(groundState)
+		server.webSocketHub.Broadcast(groundState)
 		writeJSON(writer, http.StatusAccepted, map[string]string{"status": "accepted"})
 	}
-
-	// todo: store the events until user acknowledgement
 }
 
-func handleGetTelemetry(telemetryStore *TelemetryStore) http.HandlerFunc {
+// HandleGetTelemetry returns a handler that retrieves telemetry by spacecraft ID.
+func HandleGetTelemetry(telemetryStore *store.TelemetryStore) http.HandlerFunc {
 	return func(
 		writer http.ResponseWriter,
 		request *http.Request,
@@ -108,7 +127,8 @@ func handleGetTelemetry(telemetryStore *TelemetryStore) http.HandlerFunc {
 	}
 }
 
-func handleGetWebSocket(webSocketHub *WebSocketHub) http.HandlerFunc {
+// HandleGetWebSocket returns a handler that manages a WebSocket connection.
+func HandleGetWebSocket(webSocketHub *realtime.WebSocketHub) http.HandlerFunc {
 	return func(
 		writer http.ResponseWriter,
 		request *http.Request,
@@ -141,7 +161,8 @@ func handleGetWebSocket(webSocketHub *WebSocketHub) http.HandlerFunc {
 	}
 }
 
-func acknowledgeEventHandler(eventStore *EventStore) http.HandlerFunc {
+// AcknowledgeEventHandler returns a handler that acknowledges an event by ID.
+func AcknowledgeEventHandler(eventStore *store.EventStore) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		eventIDText := r.PathValue("eventId")
 
@@ -155,7 +176,7 @@ func acknowledgeEventHandler(eventStore *EventStore) http.HandlerFunc {
 
 		err = eventStore.AcknowledgeEvent(eventID)
 		if err != nil {
-			if errors.Is(err, ErrEventNotFound) {
+			if errors.Is(err, store.ErrEventNotFound) {
 				http.Error(w, "Event not found", http.StatusNotFound)
 				return
 			}
