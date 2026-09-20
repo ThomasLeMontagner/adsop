@@ -83,7 +83,7 @@ func HandleGetSimulation(simulationStore *store.SimulationStore) http.HandlerFun
 }
 
 // HandleTelemetryIngest returns a handler that stores and broadcasts telemetry.
-func HandleTelemetryIngest(server *Server) http.HandlerFunc {
+func (server *Server) HandleTelemetryIngest() http.HandlerFunc {
 	return func(
 		writer http.ResponseWriter,
 		request *http.Request,

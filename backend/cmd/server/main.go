@@ -38,7 +38,7 @@ func main() {
 
 	serverMux.HandleFunc(
 		"POST /internal/telemetry",
-		api.HandleTelemetryIngest(apiServer),
+		apiServer.HandleTelemetryIngest(),
 	)
 
 	serverMux.HandleFunc(
